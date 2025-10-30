@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinglinks.business.mapper.ThinglinksProtocolMapper">
+    
+    <resultMap type="ThinglinksProtocol" id="ThinglinksProtocolResult">
+        <result property="id"    column="id"    />
+        <result property="protocolName"    column="protocol_name"    />
+        <result property="localUrl"    column="local_url"    />
+        <result property="mainClassPath"    column="main_class_path"    />
+        <result property="originName"    column="origin_name"    />
+        <result property="type"    column="type"    />
+        <result property="newName"    column="new_name"    />
+    </resultMap>
+
+    <sql id="selectThinglinksProtocolVo">
+        select id, protocol_name, local_url, main_class_path, origin_name, type, new_name, remark, create_time, update_time, create_by, update_by, status from thinglinks_protocol
+    </sql>
+
+    <select id="selectThinglinksProtocolList" parameterType="ThinglinksProtocol" resultMap="ThinglinksProtocolResult">
+        <include refid="selectThinglinksProtocolVo"/>
+        <where>  
+            <if test="protocolName != null  and protocolName != ''"> and protocol_name like concat('%', #{protocolName}, '%')</if>
+            <if test="localUrl != null  and localUrl != ''"> and local_url = #{localUrl}</if>
+            <if test="mainClassPath != null  and mainClassPath != ''"> and main_class_path = #{mainClassPath}</if>
+            <if test="originName != null  and originName != ''"> and origin_name like concat('%', #{originName}, '%')</if>
+            <if test="type != null  and type != ''"> and type = #{type}</if>
+            <if test="newName != null  and newName != ''"> and new_name like concat('%', #{newName}, '%')</if>
+        </where>
+        order by create_time desc
+    </select>
+    
+    <select id="selectThinglinksProtocolById" parameterType="String" resultMap="ThinglinksProtocolResult">
+        <include refid="selectThinglinksProtocolVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertThinglinksProtocol" parameterType="ThinglinksProtocol">
+        insert into thinglinks_protocol
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="protocolName != null">protocol_name,</if>
+            <if test="localUrl != null">local_url,</if>
+            <if test="mainClassPath != null">main_class_path,</if>
+            <if test="originName != null">origin_name,</if>
+            <if test="type != null">type,</if>
+            <if test="newName != null">new_name,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="protocolName != null">#{protocolName},</if>
+            <if test="localUrl != null">#{localUrl},</if>
+            <if test="mainClassPath != null">#{mainClassPath},</if>
+            <if test="originName != null">#{originName},</if>
+            <if test="type != null">#{type},</if>
+            <if test="newName != null">#{newName},</if>
+         </trim>
+    </insert>
+
+    <update id="updateThinglinksProtocol" parameterType="ThinglinksProtocol">
+        update thinglinks_protocol
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="protocolName != null">protocol_name = #{protocolName},</if>
+            <if test="localUrl != null">local_url = #{localUrl},</if>
+            <if test="mainClassPath != null">main_class_path = #{mainClassPath},</if>
+            <if test="originName != null">origin_name = #{originName},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="newName != null">new_name = #{newName},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteThinglinksProtocolById" parameterType="String">
+        delete from thinglinks_protocol where id = #{id}
+    </delete>
+
+    <delete id="deleteThinglinksProtocolByIds" parameterType="String">
+        delete from thinglinks_protocol where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

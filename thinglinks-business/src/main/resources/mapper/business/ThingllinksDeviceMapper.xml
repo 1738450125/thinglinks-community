@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinglinks.business.mapper.ThinglinksDeviceMapper">
+    
+    <resultMap type="ThinglinksDevice" id="ThinglinksDeviceResult">
+        <result property="id"    column="id"    />
+        <result property="deviceId"    column="device_id"    />
+        <result property="deviceSn"    column="device_sn"    />
+        <result property="deviceName"    column="device_name"    />
+        <result property="productId"    column="product_id"    />
+        <result property="productName"    column="product_name"    />
+        <result property="productSn"    column="product_sn"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="linkMethodId"    column="link_method_id"    />
+        <result property="linkMethodName"    column="link_method_name"    />
+        <result property="protocolId"    column="protocol_id"    />
+        <result property="protocolName"    column="protocol_name"    />
+        <result property="status"    column="status"    />
+    </resultMap>
+
+    <sql id="selectThinglinksDeviceVo">
+        select id, device_id, device_sn, device_name, product_id, product_name, product_sn, create_time, create_by, update_time, update_by, link_method_id, link_method_name, protocol_id, protocol_name, status from thinglinks_device
+    </sql>
+
+    <select id="selectThinglinksDeviceList" parameterType="ThinglinksDevice" resultMap="ThinglinksDeviceResult">
+        <include refid="selectThinglinksDeviceVo"/>
+        <where>  
+            <if test="deviceId != null  and deviceId != ''"> and device_id = #{deviceId}</if>
+            <if test="deviceSn != null  and deviceSn != ''"> and device_sn = #{deviceSn}</if>
+            <if test="deviceName != null  and deviceName != ''"> and device_name like concat('%', #{deviceName}, '%')</if>
+            <if test="productId != null  and productId != ''"> and product_id = #{productId}</if>
+            <if test="productName != null  and productName != ''"> and product_name like concat('%', #{productName}, '%')</if>
+            <if test="productSn != null  and productSn != ''"> and product_sn = #{productSn}</if>
+            <if test="linkMethodId != null  and linkMethodId != ''"> and link_method_id = #{linkMethodId}</if>
+            <if test="linkMethodName != null  and linkMethodName != ''"> and link_method_name like concat('%', #{linkMethodName}, '%')</if>
+            <if test="protocolId != null  and protocolId != ''"> and protocol_id = #{protocolId}</if>
+            <if test="protocolName != null  and protocolName != ''"> and protocol_name like concat('%', #{protocolName}, '%')</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectThinglinksDeviceById" parameterType="String" resultMap="ThinglinksDeviceResult">
+        <include refid="selectThinglinksDeviceVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertThinglinksDevice" parameterType="ThinglinksDevice">
+        insert into thinglinks_device
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="deviceId != null">device_id,</if>
+            <if test="deviceSn != null">device_sn,</if>
+            <if test="deviceName != null">device_name,</if>
+            <if test="productId != null">product_id,</if>
+            <if test="productName != null">product_name,</if>
+            <if test="productSn != null">product_sn,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="linkMethodId != null">link_method_id,</if>
+            <if test="linkMethodName != null">link_method_name,</if>
+            <if test="protocolId != null">protocol_id,</if>
+            <if test="protocolName != null">protocol_name,</if>
+            <if test="status != null">status,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="deviceId != null">#{deviceId},</if>
+            <if test="deviceSn != null">#{deviceSn},</if>
+            <if test="deviceName != null">#{deviceName},</if>
+            <if test="productId != null">#{productId},</if>
+            <if test="productName != null">#{productName},</if>
+            <if test="productSn != null">#{productSn},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="linkMethodId != null">#{linkMethodId},</if>
+            <if test="linkMethodName != null">#{linkMethodName},</if>
+            <if test="protocolId != null">#{protocolId},</if>
+            <if test="protocolName != null">#{protocolName},</if>
+            <if test="status != null">#{status},</if>
+         </trim>
+    </insert>
+
+    <update id="updateThinglinksDevice" parameterType="ThinglinksDevice">
+        update thinglinks_device
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="deviceSn != null">device_sn = #{deviceSn},</if>
+            <if test="deviceName != null">device_name = #{deviceName},</if>
+            <if test="productId != null">product_id = #{productId},</if>
+            <if test="productName != null">product_name = #{productName},</if>
+            <if test="productSn != null">product_sn = #{productSn},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="linkMethodId != null">link_method_id = #{linkMethodId},</if>
+            <if test="linkMethodName != null">link_method_name = #{linkMethodName},</if>
+            <if test="protocolId != null">protocol_id = #{protocolId},</if>
+            <if test="protocolName != null">protocol_name = #{protocolName},</if>
+            <if test="status != null">status = #{status},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteThinglinksDeviceById" parameterType="String">
+        delete from thinglinks_device where id = #{id}
+    </delete>
+
+    <delete id="deleteThinglinksDeviceByIds" parameterType="String">
+        delete from thinglinks_device where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

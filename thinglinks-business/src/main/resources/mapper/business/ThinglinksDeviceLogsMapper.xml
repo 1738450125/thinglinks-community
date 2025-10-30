@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinglinks.business.mapper.ThinglinksDeviceLogsMapper">
+    
+    <resultMap type="ThinglinksDeviceLogs" id="ThinglinksDeviceLogsResult">
+        <result property="id"    column="id"    />
+        <result property="deviceSn"    column="device_sn"    />
+        <result property="reportTime"    column="report_time"    />
+        <result property="properties"    column="properties"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="logType"    column="log_type"    />
+    </resultMap>
+
+    <sql id="selectThinglinksDeviceLogsVo">
+        select id, device_sn, report_time, properties, create_time, log_type from thinglinks_device_logs
+    </sql>
+
+    <select id="selectThinglinksDeviceLogsList" parameterType="ThinglinksDeviceLogs" resultMap="ThinglinksDeviceLogsResult">
+        <include refid="selectThinglinksDeviceLogsVo"/>
+        <where>  
+            <if test="deviceSn != null  and deviceSn != ''"> and device_sn = #{deviceSn}</if>
+            <if test="reportTime != null "> and report_time = #{reportTime}</if>
+            <if test="properties != null  and properties != ''"> and properties = #{properties}</if>
+            <if test="logType != null  and logType != ''"> and log_type = #{logType}</if>
+        </where>
+    </select>
+    
+    <select id="selectThinglinksDeviceLogsById" parameterType="Long" resultMap="ThinglinksDeviceLogsResult">
+        <include refid="selectThinglinksDeviceLogsVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertThinglinksDeviceLogs" parameterType="ThinglinksDeviceLogs">
+        insert into thinglinks_device_logs
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="deviceSn != null">device_sn,</if>
+            <if test="reportTime != null">report_time,</if>
+            <if test="properties != null">properties,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="logType != null">log_type,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="deviceSn != null">#{deviceSn},</if>
+            <if test="reportTime != null">#{reportTime},</if>
+            <if test="properties != null">#{properties},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="logType != null">#{logType},</if>
+         </trim>
+    </insert>
+
+    <update id="updateThinglinksDeviceLogs" parameterType="ThinglinksDeviceLogs">
+        update thinglinks_device_logs
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="deviceSn != null">device_sn = #{deviceSn},</if>
+            <if test="reportTime != null">report_time = #{reportTime},</if>
+            <if test="properties != null">properties = #{properties},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="logType != null">log_type = #{logType},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteThinglinksDeviceLogsById" parameterType="Long">
+        delete from thinglinks_device_logs where id = #{id}
+    </delete>
+
+    <delete id="deleteThinglinksDeviceLogsByIds" parameterType="String">
+        delete from thinglinks_device_logs where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

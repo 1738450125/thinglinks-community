@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinglinks.business.mapper.ThinglinksFunctionRecordMapper">
+    
+    <resultMap type="ThinglinksFunctionRecord" id="ThinglinksFunctionRecordResult">
+        <result property="id"    column="id"    />
+        <result property="functionId"    column="function_id"    />
+        <result property="functionCode"    column="function_code"    />
+        <result property="functionName"    column="function_name"    />
+        <result property="functionParams"    column="function_params"    />
+        <result property="isSuccess"    column="is_success"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="deviceSn"    column="device_sn"    />
+        <result property="deviceName"    column="device_name"    />
+        <result property="triggerType"    column="trigger_type"    />
+    </resultMap>
+
+    <sql id="selectThinglinksFunctionRecordVo">
+        select * from warn_function_record
+    </sql>
+
+    <select id="selectThinglinksFunctionRecordList" parameterType="ThinglinksFunctionRecord" resultMap="ThinglinksFunctionRecordResult">
+        <include refid="selectThinglinksFunctionRecordVo"/>
+        <where>  
+            <if test="functionId != null  and functionId != ''"> and function_id = #{functionId}</if>
+            <if test="functionCode != null  and functionCode != ''"> and function_code = #{functionCode}</if>
+            <if test="functionName != null  and functionName != ''"> and function_name like concat('%', #{functionName}, '%')</if>
+            <if test="functionParams != null  and functionParams != ''"> and function_params = #{functionParams}</if>
+            <if test="isSuccess != null  and isSuccess != ''"> and is_success = #{isSuccess}</if>
+            <if test="deviceSn != null  and deviceSn != ''"> and device_sn = #{deviceSn}</if>
+            <if test="deviceName != null  and deviceName != ''"> and device_name like concat('%', #{deviceName}, '%')</if>
+            <if test="triggerType != null  and triggerType != ''"> and trigger_type = #{triggerType}</if>
+        </where>
+    </select>
+    
+    <select id="selectThinglinksFunctionRecordById" parameterType="String" resultMap="ThinglinksFunctionRecordResult">
+        <include refid="selectThinglinksFunctionRecordVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertThinglinksFunctionRecord" parameterType="ThinglinksFunctionRecord">
+        insert into warn_function_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="functionId != null">function_id,</if>
+            <if test="functionCode != null">function_code,</if>
+            <if test="functionName != null">function_name,</if>
+            <if test="functionParams != null">function_params,</if>
+            <if test="isSuccess != null">is_success,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="deviceSn != null">device_sn,</if>
+            <if test="deviceName != null">device_name,</if>
+            <if test="triggerType != null">trigger_type,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="functionId != null">#{functionId},</if>
+            <if test="functionCode != null">#{functionCode},</if>
+            <if test="functionName != null">#{functionName},</if>
+            <if test="functionParams != null">#{functionParams},</if>
+            <if test="isSuccess != null">#{isSuccess},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="deviceSn != null">#{deviceSn},</if>
+            <if test="deviceName != null">#{deviceName},</if>
+            <if test="triggerType != null">#{triggerType},</if>
+         </trim>
+    </insert>
+
+    <update id="updateThinglinksFunctionRecord" parameterType="ThinglinksFunctionRecord">
+        update warn_function_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="functionId != null">function_id = #{functionId},</if>
+            <if test="functionCode != null">function_code = #{functionCode},</if>
+            <if test="functionName != null">function_name = #{functionName},</if>
+            <if test="functionParams != null">function_params = #{functionParams},</if>
+            <if test="isSuccess != null">is_success = #{isSuccess},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="deviceSn != null">device_sn = #{deviceSn},</if>
+            <if test="deviceName != null">device_name = #{deviceName},</if>
+            <if test="triggerType != null">trigger_type = #{triggerType},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteThinglinksFunctionRecordById" parameterType="String">
+        delete from warn_function_record where id = #{id}
+    </delete>
+
+    <delete id="deleteThinglinksFunctionRecordByIds" parameterType="String">
+        delete from warn_function_record where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

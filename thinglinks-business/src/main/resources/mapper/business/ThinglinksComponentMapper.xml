@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinglinks.business.mapper.ThinglinksComponentMapper">
+    
+    <resultMap type="ThinglinksComponent" id="ThinglinksComponentResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="netType"    column="net_type"    />
+        <result property="ipAddr"    column="ip_addr"    />
+        <result property="port"    column="port"    />
+        <result property="openTls"    column="open_tls"    />
+        <result property="remark"    column="remark"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="status"    column="status"    />
+        <result property="otherConfig"    column="other_config"    />
+        <result property="protocolId"    column="protocol_id"    />
+        <result property="protocolName"    column="protocol_name"    />
+    </resultMap>
+
+    <sql id="selectThinglinksComponentVo">
+        select id, name, net_type, ip_addr, port, open_tls, remark, create_time, create_by, update_time, update_by, status, other_config, protocol_id, protocol_name from thinglinks_component
+    </sql>
+
+    <select id="selectThinglinksComponentList" parameterType="ThinglinksComponent" resultMap="ThinglinksComponentResult">
+        <include refid="selectThinglinksComponentVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="netType != null  and netType != ''"> and net_type = #{netType}</if>
+            <if test="ipAddr != null  and ipAddr != ''"> and ip_addr = #{ipAddr}</if>
+            <if test="port != null "> and port = #{port}</if>
+            <if test="openTls != null  and openTls != ''"> and open_tls = #{openTls}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="otherConfig != null  and otherConfig != ''"> and other_config = #{otherConfig}</if>
+            <if test="protocolId != null  and protocolId != ''"> and protocol_id = #{protocolId}</if>
+            <if test="protocolName != null  and protocolName != ''"> and protocol_name like concat('%', #{protocolName}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectThinglinksComponentById" parameterType="String" resultMap="ThinglinksComponentResult">
+        <include refid="selectThinglinksComponentVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertThinglinksComponent" parameterType="ThinglinksComponent">
+        insert into thinglinks_component
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="name != null">name,</if>
+            <if test="netType != null">net_type,</if>
+            <if test="ipAddr != null">ip_addr,</if>
+            <if test="port != null">port,</if>
+            <if test="openTls != null">open_tls,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="status != null">status,</if>
+            <if test="otherConfig != null">other_config,</if>
+            <if test="protocolId != null">protocol_id,</if>
+            <if test="protocolName != null">protocol_name,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="name != null">#{name},</if>
+            <if test="netType != null">#{netType},</if>
+            <if test="ipAddr != null">#{ipAddr},</if>
+            <if test="port != null">#{port},</if>
+            <if test="openTls != null">#{openTls},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="status != null">#{status},</if>
+            <if test="otherConfig != null">#{otherConfig},</if>
+            <if test="protocolId != null">#{protocolId},</if>
+            <if test="protocolName != null">#{protocolName},</if>
+         </trim>
+    </insert>
+
+    <update id="updateThinglinksComponent" parameterType="ThinglinksComponent">
+        update thinglinks_component
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">name = #{name},</if>
+            <if test="netType != null">net_type = #{netType},</if>
+            <if test="ipAddr != null">ip_addr = #{ipAddr},</if>
+            <if test="port != null">port = #{port},</if>
+            <if test="openTls != null">open_tls = #{openTls},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="otherConfig != null">other_config = #{otherConfig},</if>
+            <if test="protocolId != null">protocol_id = #{protocolId},</if>
+            <if test="protocolName != null">protocol_name = #{protocolName},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteThinglinksComponentById" parameterType="String">
+        delete from thinglinks_component where id = #{id}
+    </delete>
+
+    <delete id="deleteThinglinksComponentByIds" parameterType="String">
+        delete from thinglinks_component where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

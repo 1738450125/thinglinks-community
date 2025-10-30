@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinglinks.business.mapper.ThinglinksPropertiesMapper">
+    
+    <resultMap type="ThinglinksProperties" id="ThinglinksPropertiesResult">
+        <result property="id"    column="id"    />
+        <result property="belongSn"    column="belong_sn"    />
+        <result property="belongType"    column="belong_type"    />
+        <result property="identifier"    column="identifier"    />
+        <result property="name"    column="name"    />
+        <result property="parentId"    column="parent_id"    />
+        <result property="dataType"    column="data_type"    />
+        <result property="sortNum"    column="sort_num"    />
+        <result property="fromType"    column="from_type"    />
+    </resultMap>
+
+    <sql id="selectThinglinksPropertiesVo">
+        select id, belong_sn, belong_type, identifier, name, parent_id, data_type, sort_num, from_type from thinglinks_properties
+    </sql>
+
+    <select id="selectThinglinksPropertiesList" parameterType="ThinglinksProperties" resultMap="ThinglinksPropertiesResult">
+        <include refid="selectThinglinksPropertiesVo"/>
+        <where>  
+            <if test="belongSn != null  and belongSn != ''"> and belong_sn = #{belongSn}</if>
+            <if test="belongType != null  and belongType != ''"> and belong_type = #{belongType}</if>
+            <if test="identifier != null  and identifier != ''"> and identifier = #{identifier}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="parentId != null  and parentId != ''"> and parent_id = #{parentId}</if>
+            <if test="dataType != null  and dataType != ''"> and data_type = #{dataType}</if>
+            <if test="sortNum != null "> and sort_num = #{sortNum}</if>
+            <if test="fromType != null  and fromType != ''"> and from_type = #{fromType}</if>
+        </where>
+    </select>
+    
+    <select id="selectThinglinksPropertiesById" parameterType="String" resultMap="ThinglinksPropertiesResult">
+        <include refid="selectThinglinksPropertiesVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertThinglinksProperties" parameterType="ThinglinksProperties">
+        insert into thinglinks_properties
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="belongSn != null">belong_sn,</if>
+            <if test="belongType != null">belong_type,</if>
+            <if test="identifier != null">identifier,</if>
+            <if test="name != null">name,</if>
+            <if test="parentId != null">parent_id,</if>
+            <if test="dataType != null">data_type,</if>
+            <if test="sortNum != null">sort_num,</if>
+            <if test="fromType != null">from_type,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="belongSn != null">#{belongSn},</if>
+            <if test="belongType != null">#{belongType},</if>
+            <if test="identifier != null">#{identifier},</if>
+            <if test="name != null">#{name},</if>
+            <if test="parentId != null">#{parentId},</if>
+            <if test="dataType != null">#{dataType},</if>
+            <if test="sortNum != null">#{sortNum},</if>
+            <if test="fromType != null">#{fromType},</if>
+         </trim>
+    </insert>
+
+    <update id="updateThinglinksProperties" parameterType="ThinglinksProperties">
+        update thinglinks_properties
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="belongSn != null">belong_sn = #{belongSn},</if>
+            <if test="belongType != null">belong_type = #{belongType},</if>
+            <if test="identifier != null">identifier = #{identifier},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="dataType != null">data_type = #{dataType},</if>
+            <if test="sortNum != null">sort_num = #{sortNum},</if>
+            <if test="fromType != null">from_type = #{fromType},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteThinglinksPropertiesById" parameterType="String">
+        delete from thinglinks_properties where id = #{id}
+    </delete>
+
+    <delete id="deleteThinglinksPropertiesByIds" parameterType="String">
+        delete from thinglinks_properties where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

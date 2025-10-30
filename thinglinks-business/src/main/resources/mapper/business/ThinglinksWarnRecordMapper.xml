@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinglinks.business.mapper.ThinglinksWarnRecordMapper">
+    
+    <resultMap type="ThinglinksWarnRecord" id="ThinglinksWarnRecordResult">
+        <result property="id"    column="id"    />
+        <result property="configId"    column="config_id"    />
+        <result property="configName"    column="config_name"    />
+        <result property="warnMessage"    column="warn_message"    />
+        <result property="warnData"    column="warn_data"    />
+        <result property="belongSn"    column="belong_sn"    />
+        <result property="belongType"    column="belong_type"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectThinglinksWarnRecordVo">
+        select id, config_id, config_name, warn_message, warn_data, belong_sn, belong_type, create_time from thinglinks_warn_record
+    </sql>
+
+    <select id="selectThinglinksWarnRecordList" parameterType="ThinglinksWarnRecord" resultMap="ThinglinksWarnRecordResult">
+        <include refid="selectThinglinksWarnRecordVo"/>
+        <where>  
+            <if test="configId != null  and configId != ''"> and config_id = #{configId}</if>
+            <if test="configName != null  and configName != ''"> and config_name like concat('%', #{configName}, '%')</if>
+            <if test="warnMessage != null  and warnMessage != ''"> and warn_message = #{warnMessage}</if>
+            <if test="warnData != null  and warnData != ''"> and warn_data = #{warnData}</if>
+            <if test="belongSn != null  and belongSn != ''"> and belong_sn = #{belongSn}</if>
+            <if test="belongType != null  and belongType != ''"> and belong_type = #{belongType}</if>
+        </where>
+    </select>
+    
+    <select id="selectThinglinksWarnRecordById" parameterType="String" resultMap="ThinglinksWarnRecordResult">
+        <include refid="selectThinglinksWarnRecordVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertThinglinksWarnRecord" parameterType="ThinglinksWarnRecord">
+        insert into thinglinks_warn_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="configId != null">config_id,</if>
+            <if test="configName != null">config_name,</if>
+            <if test="warnMessage != null">warn_message,</if>
+            <if test="warnData != null">warn_data,</if>
+            <if test="belongSn != null">belong_sn,</if>
+            <if test="belongType != null">belong_type,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="configId != null">#{configId},</if>
+            <if test="configName != null">#{configName},</if>
+            <if test="warnMessage != null">#{warnMessage},</if>
+            <if test="warnData != null">#{warnData},</if>
+            <if test="belongSn != null">#{belongSn},</if>
+            <if test="belongType != null">#{belongType},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateThinglinksWarnRecord" parameterType="ThinglinksWarnRecord">
+        update thinglinks_warn_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="configId != null">config_id = #{configId},</if>
+            <if test="configName != null">config_name = #{configName},</if>
+            <if test="warnMessage != null">warn_message = #{warnMessage},</if>
+            <if test="warnData != null">warn_data = #{warnData},</if>
+            <if test="belongSn != null">belong_sn = #{belongSn},</if>
+            <if test="belongType != null">belong_type = #{belongType},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteThinglinksWarnRecordById" parameterType="String">
+        delete from thinglinks_warn_record where id = #{id}
+    </delete>
+
+    <delete id="deleteThinglinksWarnRecordByIds" parameterType="String">
+        delete from thinglinks_warn_record where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

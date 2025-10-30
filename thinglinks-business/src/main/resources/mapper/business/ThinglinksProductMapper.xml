@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinglinks.business.mapper.ThinglinksProductMapper">
+    
+    <resultMap type="ThinglinksProduct" id="ThinglinksProductResult">
+        <result property="id"    column="id"    />
+        <result property="productSn"    column="product_sn"    />
+        <result property="productName"    column="product_name"    />
+        <result property="linkMethodId"    column="link_method_id"    />
+        <result property="linkMethodName"    column="link_method_name"    />
+        <result property="protocolId"    column="protocol_id"    />
+        <result property="protocolName"    column="protocol_name"    />
+        <result property="deviceCount"    column="device_count"    />
+        <result property="deviceType"    column="device_type"    />
+        <result property="remark"    column="remark"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="status"    column="status"    />
+    </resultMap>
+
+    <sql id="selectThinglinksProductVo">
+        select id, product_sn, product_name, link_method_id, link_method_name, protocol_id, protocol_name, device_count, device_type, remark, create_time, update_time, create_by, update_by, status from thinglinks_product
+    </sql>
+
+    <select id="selectThinglinksProductList" parameterType="ThinglinksProduct" resultMap="ThinglinksProductResult">
+        <include refid="selectThinglinksProductVo"/>
+        <where>  
+            <if test="productSn != null  and productSn != ''"> and product_sn = #{productSn}</if>
+            <if test="productName != null  and productName != ''"> and product_name like concat('%', #{productName}, '%')</if>
+            <if test="linkMethodId != null  and linkMethodId != ''"> and link_method_id = #{linkMethodId}</if>
+            <if test="linkMethodName != null  and linkMethodName != ''"> and link_method_name like concat('%', #{linkMethodName}, '%')</if>
+            <if test="protocolId != null  and protocolId != ''"> and protocol_id = #{protocolId}</if>
+            <if test="protocolName != null  and protocolName != ''"> and protocol_name like concat('%', #{protocolName}, '%')</if>
+            <if test="deviceCount != null "> and device_count = #{deviceCount}</if>
+            <if test="deviceType != null  and deviceType != ''"> and device_type = #{deviceType}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectThinglinksProductById" parameterType="String" resultMap="ThinglinksProductResult">
+        <include refid="selectThinglinksProductVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertThinglinksProduct" parameterType="ThinglinksProduct">
+        insert into thinglinks_product
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="productSn != null">product_sn,</if>
+            <if test="productName != null">product_name,</if>
+            <if test="linkMethodId != null">link_method_id,</if>
+            <if test="linkMethodName != null">link_method_name,</if>
+            <if test="protocolId != null">protocol_id,</if>
+            <if test="protocolName != null">protocol_name,</if>
+            <if test="deviceCount != null">device_count,</if>
+            <if test="deviceType != null">device_type,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="status != null">status,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="productSn != null">#{productSn},</if>
+            <if test="productName != null">#{productName},</if>
+            <if test="linkMethodId != null">#{linkMethodId},</if>
+            <if test="linkMethodName != null">#{linkMethodName},</if>
+            <if test="protocolId != null">#{protocolId},</if>
+            <if test="protocolName != null">#{protocolName},</if>
+            <if test="deviceCount != null">#{deviceCount},</if>
+            <if test="deviceType != null">#{deviceType},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="status != null">#{status},</if>
+         </trim>
+    </insert>
+
+    <update id="updateThinglinksProduct" parameterType="ThinglinksProduct">
+        update thinglinks_product
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="productSn != null">product_sn = #{productSn},</if>
+            <if test="productName != null">product_name = #{productName},</if>
+            <if test="linkMethodId != null">link_method_id = #{linkMethodId},</if>
+            <if test="linkMethodName != null">link_method_name = #{linkMethodName},</if>
+            <if test="protocolId != null">protocol_id = #{protocolId},</if>
+            <if test="protocolName != null">protocol_name = #{protocolName},</if>
+            <if test="deviceCount != null">device_count = #{deviceCount},</if>
+            <if test="deviceType != null">device_type = #{deviceType},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="status != null">status = #{status},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteThinglinksProductById" parameterType="String">
+        delete from thinglinks_product where id = #{id}
+    </delete>
+
+    <delete id="deleteThinglinksProductByIds" parameterType="String">
+        delete from thinglinks_product where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
