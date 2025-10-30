@@ -126,19 +126,6 @@ export const constantRoutes = [
         meta: { title: '设备详情', activeMenu: '/deviceManage/device' }
       }
     ]
-  },
-  {
-    path: '/componentManage/engine/detail',
-    component: Layout,
-    hidden: true,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/business/engine/detail'),
-        name: 'EngineDetail',
-        meta: { title: '组件详情', activeMenu: '/componentManage/engine' }
-      }
-    ]
   }
 ]
 
