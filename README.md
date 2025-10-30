@@ -1,4 +1,4 @@
-# 物联网平台 - Thinglinks-iot
+<h1 align="center">物联网平台 - Thinglinks-iot</h1>
 
 <p align="center">
   <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License">
