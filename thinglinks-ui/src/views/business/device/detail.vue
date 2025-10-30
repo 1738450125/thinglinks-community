@@ -448,7 +448,7 @@
               <el-form-item label="告警消息">
                 <el-input type="textarea" v-model="currentRule.message" placeholder="请输入告警消息"></el-input>
               </el-form-item>
-              
+
             </el-form>
 
             <div slot="footer" class="dialog-footer">
@@ -1488,7 +1488,6 @@ export default {
     },
     loadHistoryData(){
       this.historyLoading = true
-      this.historyPagination.current = 1
       this.historyParams.deviceSn = this.device.deviceSn
       this.historyParams.pageNum = this.historyPagination.current
       this.historyParams.pageSize = this.historyPagination.size
