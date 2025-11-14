@@ -1,5 +1,6 @@
 package com.thinglinks.business.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.thinglinks.common.annotation.Excel;
@@ -44,6 +45,7 @@ private static final long serialVersionUID = 1L;
     @Excel(name = "协议id")
     private String protocolId;
     /** 创建时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
     /** 创建人 */
     private String createBy;

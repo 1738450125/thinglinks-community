@@ -185,7 +185,7 @@
               <el-table-column prop="functionParams" label="自定义参数" width="200"/>
               <el-table-column prop="createTime" label="创建时间">
                 <template slot-scope="scope">
-                  <code class="condition-code">{{ formatDate(scope.row) }}</code>
+                  <code class="condition-code">{{ formatDateTime(scope.row.createTime) }}</code>
                 </template>
               </el-table-column>
               <el-table-column label="操作" width="180" fixed="right">
@@ -607,6 +607,18 @@ export default {
       const seconds = String(date.getSeconds()).padStart(2, '0')
 
       return `${year}-${month}-${day}`
+    },
+    formatDateTime(dateString) {
+      if (!dateString) return ''
+      const date = new Date(dateString)
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      const hours = String(date.getHours()).padStart(2, '0')
+      const minutes = String(date.getMinutes()).padStart(2, '0')
+      const seconds = String(date.getSeconds()).padStart(2, '0')
+
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
     },
     syncCustomConfigToDevice(){
       syncCustomConfigToDevice({customConfig:this.customConfig,productSn:this.product.productSn}).then(res=>{

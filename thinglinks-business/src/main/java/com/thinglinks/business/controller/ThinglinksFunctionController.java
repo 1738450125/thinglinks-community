@@ -111,6 +111,7 @@ public class ThinglinksFunctionController extends BaseController
                     .eq(ThinglinksProduct::getProductSn,thinglinksFunction.getBelongSn()));
             thinglinksFunction.setProtocolId(product.getProtocolId());
         }
+        thinglinksFunction.setCreateTime(new Date());
         return toAjax(thinglinksFunctionService.save(thinglinksFunction));
     }
 

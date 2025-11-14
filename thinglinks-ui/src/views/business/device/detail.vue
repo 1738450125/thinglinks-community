@@ -199,7 +199,7 @@
               <el-table-column prop="functionParams" label="自定义参数" width="200"/>
               <el-table-column prop="createTime" label="创建时间">
                 <template slot-scope="scope">
-                  <code class="condition-code">{{ formatDate(scope.row) }}</code>
+                  <code class="condition-code">{{ formatDateTime(scope.row.createTime) }}</code>
                 </template>
               </el-table-column>
               <el-table-column label="操作" width="180" fixed="right">
