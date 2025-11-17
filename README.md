@@ -92,6 +92,36 @@
 - **自动下发** - 触发告警后自动下发相应指令
 - **历史记录** - 手动\告警触发指令执行记录
 
+### 6、协议开发
+### 协议包在代码同级目录 protocol.zip
+##### 开发协议只需要实现对应网络协议的decode和encode方法即可
+
+decode对应设备上行消息协议
+
+encode对应设备指令下发解析
+
+##### 以mqtt-client为例
+
+1、实现MqttClientProtocol的decode方法，并把解析后的消息组装到DecodeMessage类并返回。
+
+2、实现MqttClientProtocol的encode方法，并把解析后的消息组装到EncodeMessage类并返回。
+
+3、打包成jar包上传到平台，并选择对应的协议分类即可。
+
+下面是协议中重要的类截图
+
+MqttClientProtocol接口：
+![架构图](doc/img/img.png)
+
+MqttClientDeal实现类：
+![架构图](doc/img/img_4.png)
+
+DecodeMessage解析后的消息实体：
+![架构图](doc/img/img_2.png)
+
+EncodeMessage解析后的指令下发实体：
+![架构图](doc/img/img_3.png)
+
 ## 🏗️ 系统架构
 
 ![架构图](doc/img/jiagou.png)
@@ -129,7 +159,6 @@
 ###### Maven >= 3.0
 ###### Node >= 12
 ###### Redis >= 3
-### 协议包在代码同级目录 protocol.zip
 ## 📊 社区版 vs 企业版
 
 | 功能特性        | 社区版 | 企业版           |
