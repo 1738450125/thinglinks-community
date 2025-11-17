@@ -117,8 +117,10 @@
 ![架构图](doc/img/tiaoshi.png)
 #### 11、协议管理
 ![架构图](doc/img/protocol.png)
-#### 12、规则引擎
+#### 12、规则引擎-数据转发
 ![架构图](doc/img/ruleEngine.png)
+#### 12、规则引擎-设备联动（开发中）
+![架构图](doc/img/liandong.png)
 ### 环境要求
 ###### JDK >= 1.8
 ###### MySQL >= 5.7
