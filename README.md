@@ -195,7 +195,7 @@ EncodeMessage解析后的指令下发实体：
 
 ![架构图](doc/img/ruleEngine.png)
 
-#### 12、规则引擎-设备联动（开发中）
+#### 12、规则引擎-设备联动
 
 ![架构图](doc/img/liandong.png)
 
