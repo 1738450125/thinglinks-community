@@ -179,7 +179,7 @@
               <!-- MQTT 客户端配置 -->
               <template v-if="form.netType === 'MQTT_CLIENT'">
                 <el-form-item label="服务器地址" prop="brokerUrl">
-                  <el-input v-model="dynamicConfig.brokerUrl" placeholder="服务器地址"/>
+                  <el-input v-model="dynamicConfig.brokerUrl" placeholder="如：tcp://127.0.0.1:1883"/>
                 </el-form-item>
                 <el-form-item label="用户名" prop="username">
                   <el-input v-model="dynamicConfig.username" placeholder="请输入用户名"/>
@@ -188,7 +188,7 @@
                   <el-input v-model="dynamicConfig.password" type="password" placeholder="请输入密码" show-password/>
                 </el-form-item>
                 <el-form-item label="订阅主题">
-                  <el-input v-model="dynamicConfig.topicStr" placeholder="用英文逗号分割,如：/#,/topic1/#,topic2"/>
+                  <el-input v-model="dynamicConfig.topicStr" placeholder="用英文逗号分割,如：#,/#,/topic1/#,topic2"/>
                 </el-form-item>
                 <el-form-item label="Keep Alive(秒)">
                   <el-input-number v-model="dynamicConfig.keepAliveInterval" :min="0" :max="65535"/>
@@ -210,7 +210,7 @@
                     v-model="dynamicConfig.custom"
                     type="textarea"
                     :rows="3"
-                    placeholder="请输入自定义配置（JSON格式）"
+                    placeholder="请输入自定义配置（建议JSON格式）"
                   />
                 </el-form-item>
               </template>
