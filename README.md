@@ -253,6 +253,9 @@ EncodeMessage解析后的指令下发实体：
 
 本项目基础框架采用 若依框架 https://www.ruoyi.vip/
 
+### 技术交流QQ群
+![架构图](doc/img/qqq.png)
+
 ### 商务合作请联系：邮箱 1738450125@qq.com
 
 ### ⭐ 支持项目
