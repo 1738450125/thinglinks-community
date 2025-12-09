@@ -201,6 +201,10 @@ EncodeMessage解析后的指令下发实体：
 
 ![架构图](doc/img/liandong.png)
 
+#### 12、规则引擎-定时下发指令
+
+![架构图](doc/img/dingshi.png)
+
 ### 环境要求
 
 ###### JDK >= 1.8
