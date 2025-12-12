@@ -197,13 +197,17 @@ EncodeMessage解析后的指令下发实体：
 
 ![架构图](doc/img/ruleEngine.png)
 
-#### 12、规则引擎-设备联动
+#### 13、规则引擎-设备联动
 
 ![架构图](doc/img/liandong.png)
 
-#### 12、规则引擎-定时下发指令
+#### 14、规则引擎-定时下发指令
 
 ![架构图](doc/img/dingshi.png)
+
+#### 15、设备管理-地图服务
+
+![架构图](doc/img/ditu.png)
 
 ### 环境要求
 
