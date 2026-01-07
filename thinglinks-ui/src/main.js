@@ -39,7 +39,6 @@ import DictData from '@/components/DictData'
 import JsonViewer from 'vue-json-viewer'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
-import '@/views/ef/index.css'
 Vue.use(ElementUI, {size: 'small'})
 // 全局方法挂载
 Vue.prototype.getDicts = getDicts
