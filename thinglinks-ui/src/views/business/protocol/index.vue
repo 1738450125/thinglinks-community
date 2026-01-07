@@ -43,7 +43,6 @@
             :lg="4"
             class="card-col"
           >
-            <el-checkbox :label="item.id" class="card-checkbox">
               <el-card class="protocol-card" shadow="hover">
                 <div slot="header" class="card-header">
                   <h4 class="protocol-name">{{ item.protocolName || '未知协议' }}</h4>
@@ -89,7 +88,6 @@
                   </el-button>
                 </div>
               </el-card>
-            </el-checkbox>
           </el-col>
         </el-row>
       </el-checkbox-group>
@@ -117,15 +115,15 @@
     >
       <div class="drawer-content">
         <el-form ref="form" :model="form" :rules="rules" label-width="120px">
-          <el-form-item label="协议名称" prop="protocolName">
+          <el-form-item label="协议名称" prop="protocolName" required>
             <el-input v-model="form.protocolName" placeholder="请输入协议名称"/>
           </el-form-item>
-          <el-form-item label="类型" prop="type">
+          <el-form-item label="类型" prop="type" required>
             <el-select v-model="form.type" placeholder="请选择类型">
               <el-option label="JAR包" value="jar"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="网络类型" prop="protocolType">
+          <el-form-item label="网络类型" prop="protocolType" required>
             <el-select v-model="form.protocolType" placeholder="网络类型">
               <el-option label="MQTT_CLIENT" value="MQTT_CLIENT"></el-option>
               <el-option label="TCP_SERVER" value="TCP_SERVER"></el-option>

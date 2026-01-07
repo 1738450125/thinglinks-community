@@ -1,32 +1,30 @@
 package com.thinglinks.business.controller;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.thinglinks.business.domain.ThinglinksComponent;
+import com.thinglinks.business.domain.ThinglinksDevice;
 import com.thinglinks.business.domain.ThinglinksProduct;
 import com.thinglinks.business.event.DeviceHeartbeatManager;
+import com.thinglinks.business.service.IThinglinksDeviceService;
 import com.thinglinks.business.service.IThinglinksProductService;
 import com.thinglinks.business.service.IThinglinksWarnConfigService;
 import com.thinglinks.business.utils.CacheUtils;
+import com.thinglinks.common.core.controller.BaseController;
+import com.thinglinks.common.core.domain.AjaxResult;
+import com.thinglinks.common.core.page.TableDataInfo;
 import com.thinglinks.common.utils.PageUtils;
 import com.thinglinks.common.utils.SecurityUtils;
 import com.thinglinks.common.utils.StringUtils;
-import org.apache.ibatis.annotations.Param;
+import com.thinglinks.common.utils.poi.ExcelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import com.thinglinks.common.core.controller.BaseController;
-import com.thinglinks.common.core.domain.AjaxResult;
-import com.thinglinks.business.domain.ThinglinksDevice;
-import com.thinglinks.business.service.IThinglinksDeviceService;
-import com.thinglinks.common.utils.poi.ExcelUtil;
-import com.thinglinks.common.core.page.TableDataInfo;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 设备Controller
@@ -54,9 +52,11 @@ public class ThinglinksDeviceController extends BaseController
         queryWrapper.orderByAsc("create_time");
         queryWrapper.like(StringUtils.isNotEmpty(thinglinksDevice.getDeviceSn()),"device_sn",thinglinksDevice.getDeviceSn());
         queryWrapper.like(StringUtils.isNotEmpty(thinglinksDevice.getDeviceName()),"device_name",thinglinksDevice.getDeviceName());
+        queryWrapper.eq(StringUtils.isNotEmpty(thinglinksDevice.getProductSn()),"product_sn",thinglinksDevice.getProductSn());
+        queryWrapper.eq(StringUtils.isNotEmpty(thinglinksDevice.getStatus()),"status",thinglinksDevice.getStatus());
         Page<ThinglinksDevice> page = new Page<ThinglinksDevice>(PageUtils.getPageNum(),PageUtils.getPageSize());
         Page<ThinglinksDevice> pageList = thinglinksDeviceService.page(page,queryWrapper);
-        return getDataTable(pageList.getRecords());
+        return getDataTable(pageList);
     }
 
     /**
@@ -122,7 +122,7 @@ public class ThinglinksDeviceController extends BaseController
         thinglinksDeviceService.updateById(thinglinksDevice);
         ThinglinksDevice newDevice = thinglinksDeviceService.getById(thinglinksDevice.getId());
         DeviceHeartbeatManager.updateHeartbeat(newDevice.getDeviceSn(),"1",newDevice.getTimeoutSeconds());
-        CacheUtils.updateDeviceCache(thinglinksDevice.getDeviceSn());
+        CacheUtils.updateDeviceCache(newDevice.getDeviceSn());
         return AjaxResult.success();
     }
 

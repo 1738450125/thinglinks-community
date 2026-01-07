@@ -5,7 +5,9 @@ package com.thinglinks.component.message;
  * @Author: thinglinks
  * @CreateTime: 2025-09-22
  */
+
 import lombok.Data;
+
 import java.util.List;
 
 @Data

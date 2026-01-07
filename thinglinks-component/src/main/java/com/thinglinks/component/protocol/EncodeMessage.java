@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * @Description: 下发消息
- * @Author: chen tao
+ * @Author: ruoyi
  * @CreateTime: 2025-10-24
  */
 @Data
@@ -30,4 +30,8 @@ public class EncodeMessage {
     /**是否保留消息*/
     private Boolean retain = false;
 
+
+    //以下是modbus-tcp专属配置
+    /**写入寄存器数据,RangeItem数组转json字符串*/
+    private String modbusWriteJson;
 }

@@ -40,66 +40,115 @@
 
     <!-- 卡片展示区域 -->
     <div class="device-card-container">
-      <el-row :gutter="15">
+      <el-row :gutter="20">
         <el-col
           v-for="(item, index) in deviceList"
           :key="index"
-          :xs="12"
-          :sm="8"
-          :md="6"
-          :lg="4"
+          :xs="24"
+          :sm="12"
+          :md="8"
+          :lg="6"
+          :xl="4"
           class="card-col"
         >
-          <el-card class="device-card" shadow="hover"
-                   :class="item.status == 1 ? 'online-status' : 'offline-status'">
-            <!-- 梯形状态标识 -->
-            <div class="status-trapezoid" :class="item.status == 1 ? 'online' : 'offline'">
-              {{ item.status == 1 ? '在线' : '离线' }}
-            </div>
-            <div @click="openDetail(item.id)">
-              <div slot="header" class="card-header">
-                <h4 class="device-name">{{ item.deviceName }}</h4>
+          <div class="device-card-wrapper">
+            <el-card
+              class="device-card"
+              shadow="never"
+              :body-style="{ padding: 0 }"
+              :class="item.status == 1 ? 'online-status' : 'offline-status'"
+            >
+
+              <!-- 卡片内容 -->
+              <div class="card-main-content" @click="openDetail(item.id)">
+                <!-- 状态标签 -->
+                <div class="card-status" :class="item.status == 1 ? 'active' : 'inactive'">
+                  <div class="status-dot"></div>
+                  <span>{{ item.status == 1 ? '在线' : '离线' }}</span>
+                </div>
+
+                <div class="device-header">
+                  <div class="device-icon" :class="item.status == 1 ? 'online' : 'offline'">
+                    <i :class="item.status == 1 ? 'el-icon-s-platform' : 'el-icon-s-release'"></i>
+                  </div>
+                  <div class="device-title">
+                    <h4 class="device-name">{{ item.deviceName }}</h4>
+                    <p class="device-sn">SN: {{ item.deviceSn }}</p>
+                  </div>
+                </div>
+
+                <div class="device-info-grid">
+                  <div class="info-item">
+                    <div class="info-label">
+                      <i class="el-icon-s-management"></i>
+                      <span>产品名称</span>
+                    </div>
+                    <div class="info-value">{{ item.productName || '未关联产品' }}</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">
+                      <i class="el-icon-s-data"></i>
+                      <span>设备类型</span>
+                    </div>
+                    <div class="info-value highlight">{{ deviceTypeText(item.deviceType) }}</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">
+                      <i class="el-icon-time"></i>
+                      <span>创建时间</span>
+                    </div>
+                    <div class="info-value time">{{ formatTime(item.createTime) }}</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">
+                      <i class="el-icon-s-tools"></i>
+                      <span>网络组件</span>
+                    </div>
+                    <div class="info-value">{{ item.componentName }}</div>
+                  </div>
+                </div>
+
               </div>
-              <div class="card-content">
-                <div class="card-item">
-                  <i>SN：</i>
-                  <span class="value">{{ item.deviceSn }}</span>
-                </div>
-                <div class="card-item">
-                  <i>产品：</i>
-                  <span class="value">{{ item.productName || '未关联产品' }}</span>
-                </div>
-                <div class="card-item">
-                  <i>设备类型：</i>
-                  <span class="value">
-                    {{ deviceTypeText(item.deviceType) }}
-                  </span>
-                </div>
+
+              <!-- 底部操作按钮 -->
+              <div class="card-footer-actions">
+                <el-button
+                  type="text"
+                  icon="el-icon-view"
+                  @click.stop="openDetail(item.id)"
+                  class="footer-btn"
+                >查看详情</el-button>
+                <el-button
+                  type="text"
+                  icon="el-icon-edit"
+                  @click.stop="handleUpdate(item)"
+                  v-hasPermi="['business:device:edit']"
+                  class="footer-btn"
+                >编辑</el-button>
+                <el-button
+                  type="text"
+                  icon="el-icon-delete"
+                  @click.stop="handleDelete(item)"
+                  v-hasPermi="['business:device:remove']"
+                  class="footer-btn delete"
+                >删除</el-button>
               </div>
-            </div>
-            <div class="card-actions">
-              <el-button
-                size="mini"
-                class="action-btn edit-btn"
-                icon="el-icon-edit"
-                @click.stop="handleUpdate(item)"
-                v-hasPermi="['business:device:edit']"
-              >修改
-              </el-button>
-              <el-button
-                size="mini"
-                class="action-btn delete-btn"
-                icon="el-icon-delete"
-                @click.stop="handleDelete(item)"
-                v-hasPermi="['business:device:remove']"
-              >删除
-              </el-button>
-            </div>
-          </el-card>
+            </el-card>
+          </div>
         </el-col>
       </el-row>
+
+      <!-- 空状态 -->
+      <div v-if="deviceList.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <i class="el-icon-s-platform"></i>
+        </div>
+        <h3 class="empty-title">暂无设备数据</h3>
+        <p class="empty-desc">点击"新增设备"按钮创建第一个设备</p>
+      </div>
     </div>
 
+    <!-- 分页 -->
     <div class="pagination-wrapper">
       <pagination
         v-show="total>0"
@@ -152,7 +201,7 @@
             <li class="note-item">5、指令下发配置默认从产品直接继承，但设备可以自己添加独有指令，切记产品同步指令下发时会覆盖设备独有指令。</li>
             <li class="note-item">
               <div class="device-type-item">
-                <span class="item-number">5、设备类型：</span>
+                <span class="item-number">6、设备类型：</span>
                 <div class="device-type-details">
                   <div class="type-option">
                     <span class="type-name">直连设备：</span>
@@ -183,7 +232,6 @@
 <script>
 import {listDevice, getDevice, delDevice, addDevice, updateDevice} from "@/api/business/device"
 import {listProduct} from "@/api/business/product";
-
 export default {
   name: "Device",
   data() {
@@ -208,6 +256,7 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      mapDialogVisible: false, // 地图弹框显示状态
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -246,6 +295,11 @@ export default {
         this.loading = false
       })
     },
+    // 可选：点击输入框区域也打开弹框
+    handleInputClick(e) {
+      // 避免点击输入框时和图标事件冲突（可选）
+      this.mapDialogVisible = true;
+    },
     deviceTypeText(deviceType) {
       const typeMap = {
         "0": '直连设备',
@@ -253,6 +307,10 @@ export default {
         "2": '无状态设备'
       }
       return typeMap[deviceType] || '未知类型'
+    },
+    formatTime(time) {
+      if (!time) return '--'
+      return time.substring(0, 16).replace('T', ' ')
     },
     // 取消按钮
     cancel() {
@@ -382,215 +440,261 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+.app-container {
+  padding: 20px;
+  min-height: calc(100vh - 50px);
+}
+
 .device-card-container {
-  margin-bottom: 30px;
+  padding: 20px 0;
 }
 
 .card-col {
-  margin-bottom: 20px;
-  transition: transform 0.3s;
+  margin-bottom: 24px;
 }
 
-.card-col:hover {
-  transform: translateY(-5px);
-}
+.device-card-wrapper {
+  height: 100%;
+  transition: all 0.3s ease;
 
-.card-checkbox {
-  display: block;
-  width: 100%;
-  position: relative;
-}
+  &:hover {
+    transform: translateY(-4px);
 
-.card-checkbox ::v-deep .el-checkbox__label {
-  width: 100%;
-  padding: 0;
+    .device-card {
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+    }
+  }
 }
 
 .device-card {
-  width: 100%;
-  height: 100%;
-  border-radius: 12px;
+  border-radius: 12px !important;
+  border: 1px solid #e4e7ed !important;
   overflow: hidden;
+  height: 100%;
   transition: all 0.3s ease;
-  position: relative;
-  border: 1px solid #e6e8eb;
-  background: #fff;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+
+  &:hover {
+    border-color: #c0c4cc !important;
+  }
 }
 
-.device-card:hover {
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-  border-color: #c0c4cc;
-}
-
-/* 在线状态渐变背景 */
-.device-card.online-status {
-  position: relative;
-  overflow: hidden;
-}
-
-.device-card.online-status::before {
-  content: '';
+.card-status {
   position: absolute;
-  top: 0;
-  right: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(103, 194, 58, 0.15) 0%, rgba(103, 194, 58, 0.05) 20%, rgba(103, 194, 58, 0) 40%);
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* 离线状态渐变背景 */
-.device-card.offline-status {
-  position: relative;
-  overflow: hidden;
-}
-
-.device-card.offline-status::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(245, 108, 108, 0.1) 0%, rgba(245, 108, 108, 0.05) 15%, rgba(245, 108, 108, 0) 30%);
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* 梯形状态标识 */
-.status-trapezoid {
-  position: absolute;
-  top: 12px;
-  right: -18px;
-  width: 70px;
-  padding: 4px 0;
-  color: white;
-  text-align: center;
+  top: 10px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
   font-size: 12px;
-  font-weight: bold;
-  transform: rotate(45deg);
+  font-weight: 500;
   z-index: 10;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  &.active {
+    background: rgba(103, 194, 58, 0.1);
+    color: #67c23a;
+
+    .status-dot {
+      background: #67c23a;
+    }
+  }
+
+  &.inactive {
+    background: rgba(245, 108, 108, 0.1);
+    color: #f56c6c;
+
+    .status-dot {
+      background: #f56c6c;
+    }
+  }
 }
 
-.status-trapezoid.online {
-  background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
 }
 
-.status-trapezoid.offline {
-  background: linear-gradient(135deg, #909399 0%, #a6a9ad 100%);
+.card-main-content {
+  padding: 24px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(245, 247, 250, 0.5);
+  }
 }
 
-.card-header {
-  padding: 15px;
-  border-bottom: 1px solid #f0f2f5;
-  position: relative;
-  z-index: 2;
+.device-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.device-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.online {
+    background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
+  }
+
+  &.offline {
+    background: linear-gradient(135deg, #909399 0%, #a6a9ad 100%);
+  }
+
+  i {
+    font-size: 24px;
+    color: white;
+  }
+}
+
+.device-title {
+  flex: 1;
 }
 
 .device-name {
-  margin: 0;
-  font-size: 16px;
+  margin: 0 0 8px 0;
+  font-size: 18px;
   font-weight: 600;
   color: #303133;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.card-content {
-  padding: 15px;
-  position: relative;
-  z-index: 2;
+.device-sn {
+  margin: 0;
+  font-size: 13px;
+  color: #909399;
+  font-family: 'Monaco', 'Consolas', monospace;
 }
 
-.card-item {
+.device-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.info-label {
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
-  font-size: 13px;
-}
-
-.card-item i {
+  gap: 6px;
+  font-size: 12px;
   color: #909399;
-  font-size: 13px;
-  font-style: normal;
-  text-align: right; /* 文字右对齐 */
+
+  i {
+    font-size: 14px;
+  }
 }
 
-.card-item .value {
-  color: #606266;
+.info-value {
+  font-size: 14px;
   font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: #303133;
+  line-height: 1.4;
+
+  &.highlight {
+    color: #409EFF;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  &.time {
+    font-size: 12px;
+    color: #909399;
+    font-family: 'Monaco', 'Consolas', monospace;
+  }
+
+  &.online-text {
+    color: #67c23a;
+    font-weight: 600;
+  }
+
+  &.offline-text {
+    color: #f56c6c;
+    font-weight: 600;
+  }
 }
 
-.card-actions {
-  padding: 12px 15px;
-  border-top: 1px solid #f0f2f5;
-  text-align: center;
+.card-footer-actions {
   display: flex;
   justify-content: space-around;
-  position: relative;
-  z-index: 2;
+  padding: 16px 20px;
+  background: #f8fafc;
+  border-top: 1px solid #f0f2f5;
 }
 
-.action-btn {
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  padding: 6px 10px;
-  transition: all 0.2s;
-  font-size: 12px;
+.footer-btn {
+  color: #606266;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 8px;
+
+  &:hover {
+    color: #409EFF;
+  }
+
+  &.delete:hover {
+    color: #f56c6c;
+  }
+
+  i {
+    margin-right: 4px;
+  }
 }
 
-.edit-btn {
-  background: linear-gradient(to bottom, #f0f9ff, #e6f7ff);
-  border-color: #91d5ff;
-  color: #1890ff;
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+
+  .empty-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+
+    i {
+      font-size: 40px;
+      color: #409EFF;
+    }
+  }
+
+  .empty-title {
+    margin: 0 0 12px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #303133;
+  }
+
+  .empty-desc {
+    margin: 0;
+    font-size: 14px;
+    color: #909399;
+  }
 }
 
-.edit-btn:hover {
-  background: linear-gradient(to bottom, #e6f7ff, #d3eefe);
-  border-color: #69c0ff;
-  color: #096dd9;
-}
-
-.delete-btn {
-  background: linear-gradient(to bottom, #fff2f0, #fff0ed);
-  border-color: #ffccc7;
-  color: #ff4d4f;
-}
-
-.delete-btn:hover {
-  background: linear-gradient(to bottom, #fff0ed, #ffeae8);
-  border-color: #ffa39e;
-  color: #f5222d;
-}
-
-/* 复选框样式调整 */
-::v-deep .el-checkbox__input {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 11;
-}
-
-::v-deep .el-checkbox__inner {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-}
-
-::v-deep .el-checkbox__inner::after {
-  height: 9px;
-  left: 6px;
-  top: 2px;
-}
-
-/* 添加分页容器样式 */
 .pagination-wrapper {
   position: fixed;
   bottom: 20px;
@@ -599,54 +703,34 @@ export default {
   z-index: 1000;
 }
 
-/* 调整卡片容器底部边距，避免内容被分页遮挡 */
-.product-card-container {
-  margin-bottom: 80px;
-}
-
-/* 可选：如果需要进一步美化分页组件本身 */
 ::v-deep .el-pagination {
-  background: transparent;
-}
-
-::v-deep .el-pagination .btn-prev,
-::v-deep .el-pagination .btn-next,
-::v-deep .el-pagination .number {
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-::v-deep .el-pagination .number.active {
-  background: #409EFF;
-  color: #fff;
-  border-color: #409EFF;
-}
-
-/* 抽屉样式 */
-.component-drawer ::v-deep .el-drawer {
-  overflow-y: auto;
+  background: transparent !important;
 }
 
 .drawer-content {
-  padding: 20px;
+  padding: 24px;
   height: 100%;
   display: flex;
   flex-direction: column;
-}
 
-.drawer-footer {
-  margin-top: auto;
-  padding: 20px 0;
-  text-align: right;
-}
-
-/* 响应式调整 */
-@media screen and (max-width: 768px) {
-  .component-drawer ::v-deep .el-drawer {
-    width: 85% !important;
+  .el-form {
+    flex: 0 0 auto;
   }
 }
+
+::v-deep .el-drawer {
+  .el-drawer__header {
+    margin-bottom: 24px;
+    padding: 24px 24px 0;
+    font-weight: 600;
+    font-size: 18px;
+
+    span {
+      color: #303133;
+    }
+  }
+}
+
 .notes-section {
   margin: 20px 0;
   padding: 16px;
@@ -710,14 +794,89 @@ export default {
   display: inline-block;
   min-width: 80px;
 }
-.tixing {
-  font-weight: 500;
-  color: #ff8c00;
-  display: inline-block;
-  min-width: 80px;
-}
+
 .type-desc {
   color: #606266;
 }
 
+.drawer-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 24px;
+  border-top: 1px solid #e4e7ed;
+}
+
+// 响应式调整
+@media screen and (max-width: 1200px) {
+  .device-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .app-container {
+    padding: 16px;
+  }
+
+  .card-col {
+    margin-bottom: 16px;
+  }
+
+  .device-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .device-icon {
+    width: 48px;
+    height: 48px;
+
+    i {
+      font-size: 20px;
+    }
+  }
+
+  .device-name {
+    font-size: 16px;
+  }
+
+  .card-footer-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .pagination-wrapper {
+    position: static;
+    margin-top: 20px;
+    box-shadow: none;
+    background: transparent;
+    padding: 0;
+  }
+}
+
+// 动画效果
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.device-card-wrapper {
+  animation: fadeIn 0.3s ease-out;
+  animation-fill-mode: both;
+
+  @for $i from 1 through 20 {
+    &:nth-child(#{$i}) {
+      animation-delay: $i * 0.05s;
+    }
+  }
+}
 </style>

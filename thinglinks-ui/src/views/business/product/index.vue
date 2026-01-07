@@ -32,67 +32,108 @@
 
     <!-- 卡片展示区域 -->
     <div class="product-card-container">
-      <el-row :gutter="15">
+      <el-row :gutter="20">
         <el-col
           v-for="(item, index) in productList"
           :key="index"
-          :xs="12"
-          :sm="8"
-          :md="6"
-          :lg="4"
+          :xs="24"
+          :sm="12"
+          :md="8"
+          :lg="6"
+          :xl="4"
           class="card-col"
         >
-          <el-card class="product-card" shadow="hover"
-                   :class="'active-status'">
-            <!-- 梯形状态标识 -->
-<!--            <div class="status-trapezoid" :class="'active'">-->
-<!--              {{ item.status == 1 ? '启用' : '停用' }}-->
-<!--            </div>-->
-            <div @click="openProductDetail(item.id)">
-            <div slot="header" class="card-header">
-              <h4 class="product-name">{{ item.productName }}</h4>
-            </div>
-            <div class="card-content">
-              <div class="card-item">
-                <i>SN：</i>
-                <span class="value">{{ item.productSn }}</span>
+          <div class="product-card-wrapper">
+            <el-card
+              class="product-card"
+              shadow="never"
+              :body-style="{ padding: 0 }"
+            >
+
+              <!-- 卡片内容 -->
+              <div class="card-main-content" @click="openProductDetail(item.id)">
+                <div class="product-header">
+                  <div class="product-icon">
+                    <i class="el-icon-s-management"></i>
+                  </div>
+                  <div class="product-title">
+                    <h4 class="product-name">{{ item.productName }}</h4>
+                    <p class="product-sn">SN: {{ item.productSn }}</p>
+                  </div>
+                </div>
+
+                <div class="product-info-grid">
+                  <div class="info-item">
+                    <div class="info-label">
+                      <i class="el-icon-s-platform"></i>
+                      <span>设备类型</span>
+                    </div>
+                    <div class="info-value">{{ deviceTypeText(item.deviceType) }}</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">
+                      <i class="el-icon-s-data"></i>
+                      <span>设备数量</span>
+                    </div>
+                    <div class="info-value highlight">{{ item.deviceCount || 0 }}</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">
+                      <i class="el-icon-s-tools"></i>
+                      <span>网络组件</span>
+                    </div>
+                    <div class="info-value">{{ item.componentName || '未配置' }}</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">
+                      <i class="el-icon-time"></i>
+                      <span>创建时间</span>
+                    </div>
+                    <div class="info-value time">{{ formatTime(item.createTime) }}</div>
+                  </div>
+                </div>
+
               </div>
-              <div class="card-item">
-                <i>设备数量：</i>
-                <span class="value device-count">{{ item.deviceCount || 0 }}</span>
+
+              <!-- 底部操作按钮 -->
+              <div class="card-footer-actions">
+                <el-button
+                  type="text"
+                  icon="el-icon-view"
+                  @click.stop="openProductDetail(item.id)"
+                  class="footer-btn"
+                >查看详情</el-button>
+                <el-button
+                  type="text"
+                  icon="el-icon-edit"
+                  @click.stop="handleUpdate(item)"
+                  v-hasPermi="['business:product:edit']"
+                  class="footer-btn"
+                >编辑</el-button>
+                <el-button
+                  type="text"
+                  icon="el-icon-delete"
+                  @click.stop="handleDelete(item)"
+                  v-hasPermi="['business:product:remove']"
+                  class="footer-btn delete"
+                >删除</el-button>
               </div>
-              <div class="card-item">
-                <i>设备类型：</i>
-                <span class="value">{{ deviceTypeText(item.deviceType)}}</span>
-              </div>
-              <div class="card-item">
-                <i>网络组件：</i>
-                <span class="value">{{ item.componentName}}</span>
-              </div>
-            </div>
-            </div>
-            <div class="card-actions">
-              <el-button
-                size="mini"
-                class="action-btn edit-btn"
-                icon="el-icon-edit"
-                @click.stop="handleUpdate(item)"
-                v-hasPermi="['business:product:edit']"
-              >修改
-              </el-button>
-              <el-button
-                size="mini"
-                class="action-btn delete-btn"
-                icon="el-icon-delete"
-                @click.stop="handleDelete(item)"
-                v-hasPermi="['business:product:remove']"
-              >删除
-              </el-button>
-            </div>
-          </el-card>
+            </el-card>
+          </div>
         </el-col>
       </el-row>
+
+      <!-- 空状态 -->
+      <div v-if="productList.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <i class="el-icon-s-management"></i>
+        </div>
+        <h3 class="empty-title">暂无产品数据</h3>
+        <p class="empty-desc">点击"新增产品"按钮创建第一个产品</p>
+      </div>
     </div>
+
+    <!-- 分页 -->
     <div class="pagination-wrapper">
       <pagination
         v-show="total>0"
@@ -103,7 +144,8 @@
         @pagination="getList"
       />
     </div>
-    <!-- 将对话框改为抽屉 -->
+
+    <!-- 新增/编辑抽屉 -->
     <el-drawer
       :title="title"
       :visible.sync="open"
@@ -111,6 +153,7 @@
       size="40%"
       :before-close="cancel"
       class="component-drawer"
+      :wrapperClosable="true"
     >
       <div class="drawer-content">
         <!-- 添加或修改产品对话框 -->
@@ -126,6 +169,8 @@
 <!--          </el-form-item>-->
           <el-form-item label="设备类型" prop="deviceType" required>
             <el-select v-model="form.deviceType" placeholder="设备类型" :disabled="form.id" @change="handleProductChange">
+              <el-option label="直连设备" value="0"></el-option>
+              <el-option label="网关设备" value="1"></el-option>
               <el-option label="无状态设备" value="2"></el-option>
             </el-select>
           </el-form-item>
@@ -194,31 +239,21 @@
 <script>
 import {listProduct, getProduct, delProduct, addProduct, updateProduct} from "@/api/business/product"
 import {listComponent} from "@/api/business/component"
+
 export default {
   name: "Product",
   data() {
     return {
-      // 遮罩层
       loading: true,
-      // 选中数组
       ids: [],
-      // 选中的卡片
       selectedCards: [],
-      // 非单个禁用
       single: true,
-      // 非多个禁用
       multiple: true,
-      // 显示搜索条件
       showSearch: true,
-      // 总条数
       total: 0,
-      // 产品表格数据
       productList: [],
-      // 弹出层标题
       title: "",
-      // 是否显示弹出层
       open: false,
-      // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 12,
@@ -232,13 +267,11 @@ export default {
         deviceType: null,
         status: null
       },
-      // 表单参数
       form: {},
-      // 表单校验
       rules: {},
-      selectedDeviceType:null,
-      isEdit:false,
-      componentList:[]
+      selectedDeviceType: null,
+      isEdit: false,
+      componentList: []
     }
   },
   created() {
@@ -246,7 +279,6 @@ export default {
     this.initComponentList();
   },
   methods: {
-    /** 查询产品列表 */
     getList() {
       this.loading = true
       listProduct(this.queryParams).then(response => {
@@ -263,12 +295,14 @@ export default {
       }
       return typeMap[deviceType] || '未知类型'
     },
-    // 取消按钮
+    formatTime(time) {
+      if (!time) return '--'
+      return time.substring(0, 16).replace('T', ' ')
+    },
     cancel() {
       this.open = false
       this.reset()
     },
-    // 表单重置
     reset() {
       this.form = {
         id: null,
@@ -290,35 +324,30 @@ export default {
       this.selectedDeviceType = null
       this.resetForm("form")
     },
-    /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1
       this.getList()
     },
-    /** 重置按钮操作 */
     resetQuery() {
       this.resetForm("queryForm")
       this.handleQuery()
     },
-    // 卡片选择变化
     handleCardSelectionChange(selection) {
       this.ids = selection
       this.single = selection.length !== 1
       this.multiple = !selection.length
     },
-    async initComponentList(){
-      listComponent({pageNum:1,pageSize:100000}).then(res=>{
+    async initComponentList() {
+      listComponent({pageNum: 1, pageSize: 100000}).then(res => {
         this.componentList = res?.rows;
       })
     },
-    /** 新增按钮操作 */
     handleAdd() {
       this.reset()
       this.isEdit = false;
       this.open = true
-      this.title = "添加产品"
+      this.title = "新增产品"
     },
-    /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset()
       this.isEdit = true;
@@ -326,16 +355,15 @@ export default {
       getProduct(id).then(response => {
         this.form = response.data
         this.open = true
-        this.title = "修改产品"
+        this.title = "编辑产品"
         this.handleProductChange(this.form.deviceType);
       })
     },
-    /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          if(this.form.componentId){
-            let component = this.componentList.find(item=>item.id===this.form.componentId);
+          if (this.form.componentId) {
+            let component = this.componentList.find(item => item.id === this.form.componentId);
             this.form.componentName = component?.name;
           }
           if (this.form.id != null) {
@@ -354,7 +382,6 @@ export default {
         }
       })
     },
-    /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids
       this.$modal.confirm('是否确认删除产品编号为"' + ids + '"的数据项？').then(function () {
@@ -366,7 +393,6 @@ export default {
       }).catch(() => {
       })
     },
-    /** 导出按钮操作 */
     handleExport() {
       this.download('business/product/export', {
         ...this.queryParams
@@ -389,231 +415,288 @@ export default {
   }
 }
 </script>
-<style scoped>
+
+<style scoped lang="scss">
+.app-container {
+  padding: 20px;
+  min-height: calc(100vh - 50px);
+}
+
 .product-card-container {
-  margin-bottom: 30px;
+  padding: 20px 0;
 }
 
 .card-col {
-  margin-bottom: 20px;
-  transition: transform 0.3s;
+  margin-bottom: 24px;
 }
 
-.card-col:hover {
-  transform: translateY(-5px);
-}
+.product-card-wrapper {
+  height: 100%;
+  transition: all 0.3s ease;
 
-.card-checkbox {
-  display: block;
-  width: 100%;
-  position: relative;
-}
+  &:hover {
+    transform: translateY(-4px);
 
-.card-checkbox ::v-deep .el-checkbox__label {
-  width: 100%;
-  padding: 0;
+    .product-card {
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+    }
+  }
 }
 
 .product-card {
-  width: 100%;
-  height: 100%;
-  border-radius: 12px;
+  border-radius: 12px !important;
+  border: 1px solid #e4e7ed !important;
   overflow: hidden;
+  height: 100%;
   transition: all 0.3s ease;
-  position: relative;
-  border: 1px solid #e6e8eb;
-  background: #fff;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+
+  &:hover {
+    border-color: #c0c4cc !important;
+  }
 }
 
-.product-card:hover {
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-  border-color: #c0c4cc;
-}
-
-/* 启用状态渐变背景 */
-.product-card.active-status {
-  position: relative;
-  overflow: hidden;
-}
-
-.product-card.active-status::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(64, 158, 255, 0.15) 0%, rgba(64, 158, 255, 0.05) 20%, rgba(64, 158, 255, 0) 40%);
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* 停用状态渐变背景 */
-.product-card.inactive-status {
-  position: relative;
-  overflow: hidden;
-}
-
-.product-card.inactive-status::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(245, 108, 108, 0.1) 0%, rgba(245, 108, 108, 0.05) 15%, rgba(245, 108, 108, 0) 30%);
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* 梯形状态标识 */
-.status-trapezoid {
-  position: absolute;
-  top: 12px;
-  right: -18px;
-  width: 70px;
-  padding: 4px 0;
-  color: white;
-  text-align: center;
-  font-size: 12px;
-  font-weight: bold;
-  transform: rotate(45deg);
-  z-index: 10;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.status-trapezoid.active {
-  background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
-}
-
-.status-trapezoid.inactive {
-  background: linear-gradient(135deg, #f56c6c 0%, #f78989 100%);
-}
-
-.card-header {
-  padding: 15px;
+.card-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(90deg, #f8fafc 0%, #ffffff 100%);
   border-bottom: 1px solid #f0f2f5;
-  position: relative;
-  z-index: 2;
+}
+
+.card-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+
+  &.active {
+    background: rgba(103, 194, 58, 0.1);
+    color: #67c23a;
+
+    .status-dot {
+      background: #67c23a;
+    }
+  }
+
+  &.inactive {
+    background: rgba(245, 108, 108, 0.1);
+    color: #f56c6c;
+
+    .status-dot {
+      background: #f56c6c;
+    }
+  }
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.card-actions-mini {
+  display: flex;
+  gap: 4px;
+}
+
+.mini-action-btn {
+  padding: 4px 8px;
+  font-size: 14px;
+  color: #909399;
+
+  &:hover {
+    color: #409EFF;
+  }
+
+  &.delete:hover {
+    color: #f56c6c;
+  }
+}
+
+.card-main-content {
+  padding: 24px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(245, 247, 250, 0.5);
+  }
+}
+
+.product-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.product-icon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #409EFF 0%, #67c2ff 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  i {
+    font-size: 24px;
+    color: white;
+  }
+}
+
+.product-title {
+  flex: 1;
 }
 
 .product-name {
-  margin: 0;
-  font-size: 16px;
+  margin: 0 0 8px 0;
+  font-size: 18px;
   font-weight: 600;
   color: #303133;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.card-content {
-  padding: 15px;
-  position: relative;
-  z-index: 2;
+.product-sn {
+  margin: 0;
+  font-size: 13px;
+  color: #909399;
+  font-family: 'Monaco', 'Consolas', monospace;
 }
 
-.card-item {
+.product-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.info-label {
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
-  font-size: 13px;
-}
-
-.card-item i {
-  margin-right: 8px;
+  gap: 6px;
+  font-size: 12px;
   color: #909399;
-  font-size: 14px;
+
+  i {
+    font-size: 14px;
+  }
 }
 
-.card-item .value {
-  color: #606266;
+.info-value {
+  font-size: 14px;
   font-weight: 500;
+  color: #303133;
+  line-height: 1.4;
+
+  &.highlight {
+    color: #409EFF;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  &.time {
+    font-size: 12px;
+    color: #909399;
+    font-family: 'Monaco', 'Consolas', monospace;
+  }
 }
 
-.device-count {
-  color: #409EFF !important;
-  font-size: 14px;
-  font-weight: 600 !important;
-}
-
-.card-actions {
-  padding: 12px 15px;
+.device-usage {
+  margin-top: 20px;
+  padding-top: 20px;
   border-top: 1px solid #f0f2f5;
-  text-align: center;
+}
+
+.usage-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #909399;
+}
+
+::v-deep .el-progress-bar__outer {
+  border-radius: 10px;
+  background-color: #f0f2f5;
+}
+
+.card-footer-actions {
   display: flex;
   justify-content: space-around;
-  position: relative;
-  z-index: 2;
+  padding: 16px 20px;
+  background: #f8fafc;
+  border-top: 1px solid #f0f2f5;
 }
 
-.action-btn {
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  padding: 6px 10px;
-  transition: all 0.2s;
-  font-size: 12px;
+.footer-btn {
+  color: #606266;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 8px;
+
+  &:hover {
+    color: #409EFF;
+  }
+
+  &.delete:hover {
+    color: #f56c6c;
+  }
+
+  i {
+    margin-right: 4px;
+  }
 }
 
-.edit-btn {
-  background: linear-gradient(to bottom, #f0f9ff, #e6f7ff);
-  border-color: #91d5ff;
-  color: #1890ff;
-}
-
-.edit-btn:hover {
-  background: linear-gradient(to bottom, #e6f7ff, #d3eefe);
-  border-color: #69c0ff;
-  color: #096dd9;
-}
-
-.delete-btn {
-  background: linear-gradient(to bottom, #fff2f0, #fff0ed);
-  border-color: #ffccc7;
-  color: #ff4d4f;
-}
-
-.delete-btn:hover {
-  background: linear-gradient(to bottom, #fff0ed, #ffeae8);
-  border-color: #ffa39e;
-  color: #f5222d;
-}
-
-/* 复选框样式调整 */
-::v-deep .el-checkbox__input {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 11;
-}
-
-::v-deep .el-checkbox__inner {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-}
-
-::v-deep .el-checkbox__inner::after {
-  height: 9px;
-  left: 6px;
-  top: 2px;
-}
-
-/* 空数据提示 */
-.no-data {
+.empty-state {
   text-align: center;
-  padding: 40px 0;
-  color: #909399;
-  font-size: 14px;
+  padding: 80px 20px;
+
+  .empty-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+
+    i {
+      font-size: 40px;
+      color: #409EFF;
+    }
+  }
+
+  .empty-title {
+    margin: 0 0 12px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #303133;
+  }
+
+  .empty-desc {
+    margin: 0;
+    font-size: 14px;
+    color: #909399;
+  }
 }
 
-.no-data i {
-  font-size: 40px;
-  margin-bottom: 10px;
-  display: block;
-}
-
-/* 添加分页容器样式 */
 .pagination-wrapper {
   position: fixed;
   bottom: 20px;
@@ -622,52 +705,31 @@ export default {
   z-index: 1000;
 }
 
-/* 调整卡片容器底部边距，避免内容被分页遮挡 */
-.product-card-container {
-  margin-bottom: 80px;
-}
-
-/* 可选：如果需要进一步美化分页组件本身 */
 ::v-deep .el-pagination {
-  background: transparent;
-}
-
-::v-deep .el-pagination .btn-prev,
-::v-deep .el-pagination .btn-next,
-::v-deep .el-pagination .number {
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-::v-deep .el-pagination .number.active {
-  background: #409EFF;
-  color: #fff;
-  border-color: #409EFF;
-}
-
-/* 抽屉样式 */
-.component-drawer ::v-deep .el-drawer {
-  overflow-y: auto;
+  background: transparent !important;
 }
 
 .drawer-content {
-  padding: 20px;
+  padding: 24px;
   height: 100%;
   display: flex;
   flex-direction: column;
+
+  .el-form {
+    flex: 0 0 auto;
+  }
 }
 
-.drawer-footer {
-  margin-top: auto;
-  padding: 20px 0;
-  text-align: right;
-}
+::v-deep .el-drawer {
+  .el-drawer__header {
+    margin-bottom: 24px;
+    padding: 24px 24px 0;
+    font-weight: 600;
+    font-size: 18px;
 
-/* 响应式调整 */
-@media screen and (max-width: 768px) {
-  .component-drawer ::v-deep .el-drawer {
-    width: 85% !important;
+    span {
+      color: #303133;
+    }
   }
 }
 .notes-section {
@@ -741,5 +803,86 @@ export default {
 }
 .type-desc {
   color: #606266;
+}
+
+.drawer-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 24px;
+  border-top: 1px solid #e4e7ed;
+}
+
+// 响应式调整
+@media screen and (max-width: 1200px) {
+  .product-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .app-container {
+    padding: 16px;
+  }
+
+  .card-col {
+    margin-bottom: 16px;
+  }
+
+  .product-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .product-icon {
+    width: 48px;
+    height: 48px;
+
+    i {
+      font-size: 20px;
+    }
+  }
+
+  .product-name {
+    font-size: 16px;
+  }
+
+  .card-footer-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .pagination-wrapper {
+    position: static;
+    margin-top: 20px;
+    box-shadow: none;
+    background: transparent;
+    padding: 0;
+  }
+}
+
+// 动画效果
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.product-card-wrapper {
+  animation: fadeIn 0.3s ease-out;
+  animation-fill-mode: both;
+
+  @for $i from 1 through 20 {
+    &:nth-child(#{$i}) {
+      animation-delay: $i * 0.05s;
+    }
+  }
 }
 </style>

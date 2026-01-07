@@ -134,35 +134,23 @@
     >
       <div class="drawer-content">
         <el-form ref="form" :model="form" :rules="rules" label-width="120px">
-          <el-form-item label="组件名称" prop="name">
+          <el-form-item label="组件名称" prop="name" required>
             <el-input v-model="form.name" placeholder="请输入组件名称"/>
           </el-form-item>
-          <el-form-item label="网络类型" prop="netType">
+          <el-form-item label="网络类型" prop="netType" required>
             <el-select v-model="form.netType" placeholder="请选择" @change="handleNetTypeChange">
               <el-option label="MQTT_CLIENT" value="MQTT_CLIENT"></el-option>
               <el-option label="TCP_SERVER" value="TCP_SERVER"></el-option>
             </el-select>
           </el-form-item>
-<!--          <el-form-item label="IP地址" prop="ipAddr">-->
-<!--            <el-input v-model="form.ipAddr" placeholder="请输入IP地址"/>-->
-<!--          </el-form-item>-->
-<!--          <el-form-item label="端口" prop="port">-->
-<!--            <el-input v-model="form.port" placeholder="请输入端口"/>-->
-<!--          </el-form-item>-->
-<!--          <el-form-item label="是否开启TLS" prop="openTls">-->
-<!--            <el-select v-model="form.openTls" placeholder="请选择">-->
-<!--              <el-option label="是" value="1"></el-option>-->
-<!--              <el-option label="否" value="0"></el-option>-->
-<!--            </el-select>-->
-<!--          </el-form-item>-->
-          <el-form-item label="状态" prop="status">
+          <el-form-item label="状态" prop="status" required>
             <el-select v-model="form.status" placeholder="请选择">
               <el-option label="启用" value="1"></el-option>
               <el-option label="停用" value="0"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="协议绑定">
-            <el-select v-model="selectProtocolId" placeholder="请选择" @change="handleProtocolChange">
+          <el-form-item label="协议绑定" >
+            <el-select v-model="selectProtocolId" placeholder="请选择" @change="handleProtocolChange" :disabled="form.protocolId">
               <el-option
                 v-for="item in protocolList"
                 :key="item.id"
@@ -178,8 +166,8 @@
             <div class="dynamic-config-fields">
               <!-- MQTT 客户端配置 -->
               <template v-if="form.netType === 'MQTT_CLIENT'">
-                <el-form-item label="服务器地址" prop="brokerUrl">
-                  <el-input v-model="dynamicConfig.brokerUrl" placeholder="如：tcp://127.0.0.1:1883"/>
+                <el-form-item label="服务器地址" prop="brokerUrl" required>
+                  <el-input v-model="dynamicConfig.brokerUrl" placeholder="如 tcp://127.0.0.1:1883"/>
                 </el-form-item>
                 <el-form-item label="用户名" prop="username">
                   <el-input v-model="dynamicConfig.username" placeholder="请输入用户名"/>
@@ -187,7 +175,7 @@
                 <el-form-item label="密码" prop="password">
                   <el-input v-model="dynamicConfig.password" type="password" placeholder="请输入密码" show-password/>
                 </el-form-item>
-                <el-form-item label="订阅主题">
+                <el-form-item label="订阅主题" required>
                   <el-input v-model="dynamicConfig.topicStr" placeholder="用英文逗号分割,如：#,/#,/topic1/#,topic2"/>
                 </el-form-item>
                 <el-form-item label="Keep Alive(秒)">
@@ -195,14 +183,12 @@
                 </el-form-item>
               </template>
 
-
-              <!-- TCP 服务器配置 -->
-              <template v-else-if="form.netType === 'TCP_SERVER'">
+              <!-- TCP/UDP 服务器配置 -->
+              <template v-else-if="form.netType === 'TCP_SERVER' || form.netType === 'UDP_SERVER'">
                 <el-form-item label="端口" prop="serverPort">
                   <el-input v-model="dynamicConfig.serverPort" placeholder="端口"/>
                 </el-form-item>
               </template>
-
               <!-- 默认配置（当没有匹配的类型时） -->
               <template v-else>
                 <el-form-item label="自定义配置">
@@ -365,7 +351,40 @@ export default {
         }
       }
     },
+    /** 匿名开关变化处理 */
+    handleAnonymousChange(value) {
+      if (value === true) {
+        // 允许匿名时清空用户名密码
+        this.dynamicConfig.username = ''
+        this.dynamicConfig.password = ''
+      }
+    },
 
+    /** 匿名开关变化处理 */
+    handleIsAuthChange(value) {
+      if (value === true) {
+        // 允许匿名时清空用户名密码
+        this.dynamicConfig.tokenConfig = ''
+      }
+    },
+    /** 端口验证 */
+    validatePort(rule, value, callback) {
+      if (!value) {
+        if (rule.required) {
+          callback(new Error('端口不能为空'))
+        } else {
+          callback()
+        }
+        return
+      }
+
+      const port = parseInt(value)
+      if (isNaN(port) || port < 1 || port > 65535) {
+        callback(new Error('端口范围必须在1-65535之间'))
+      } else {
+        callback()
+      }
+    },
     /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1
@@ -386,7 +405,7 @@ export default {
     handleAdd() {
       this.reset()
       this.open = true
-      this.form.status = '1'
+      this.form.status = '0'
       this.form.openTls = '0'
       this.title = "添加网络组件"
     },
@@ -428,9 +447,11 @@ export default {
           }
           // 将动态配置转换为 JSON 字符串
           this.form.otherConfig = JSON.stringify(this.dynamicConfig)
-          this.form.protocolId = this.selectProtocolId
-          let protocol = this.protocolList.find(item => item.id === this.form.protocolId)
-          this.form.protocolName = protocol.protocolName
+          if(this.selectProtocolId){
+            this.form.protocolId = this.selectProtocolId
+            let protocol = this.protocolList.find(item => item.id === this.form.protocolId)
+            this.form.protocolName = protocol.protocolName
+          }
           if (this.form.id != null) {
             updateComponent(this.form).then(response => {
               this.$modal.msgSuccess("修改成功")
@@ -661,6 +682,7 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex: 1;
 }
 
 .card-actions {

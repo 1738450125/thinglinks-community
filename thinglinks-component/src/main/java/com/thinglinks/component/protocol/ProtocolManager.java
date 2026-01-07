@@ -1,5 +1,9 @@
 package com.thinglinks.component.protocol;
 
+import com.alibaba.fastjson2.JSONArray;
+import com.thinglinks.common.utils.spring.SpringUtils;
+import org.springframework.data.redis.core.RedisTemplate;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -35,7 +39,7 @@ public class ProtocolManager {
      * 类加载器
      */
     public static Map<String,URLClassLoader> CLASSLOADER_MAP = new HashMap<>();
-
+    public static String redisPath = "com.thinglinks.protocol.utils.RedisContextHolder";
     public static boolean addProtocol(String id,String protocolType,String path,String mainClass) throws Exception {
         File file = new File(path);
         URL url = file.toURI().toURL();
@@ -43,6 +47,17 @@ public class ProtocolManager {
         URLClassLoader classLoader = new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
         Class<?> interfaceClass = classLoader.loadClass(mainClass);
         List<Class<?>> implementations = findImplementations(file, interfaceClass, classLoader);
+        RedisTemplate<String, Object> redisTemplate = SpringUtils.getBean("redisTemplate");
+        try {
+            Class<?> redisContextClass = classLoader.loadClass(redisPath);
+            Method setRedisTemplateMethod = redisContextClass.getMethod(
+                    "setRedisTemplate",
+                    RedisTemplate.class  // 方法的参数类型
+            );
+            setRedisTemplateMethod.invoke(redisContextClass, redisTemplate);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         if (!implementations.isEmpty()) {
             // 使用第一个找到的实现类
             Class<?> implementationClass = implementations.get(0);
@@ -51,32 +66,12 @@ public class ProtocolManager {
             Method encodeMethod = null;
             // 反射调用方法
             switch (protocolType){
-                case "MQTT_BROKER":
-                    decodeMethod = implementationClass.getMethod("decode",String.class,String.class);
-                    encodeMethod = implementationClass.getMethod("encode",String.class,String.class,Map.class,String.class,String.class);
-                    break;
                 case "MQTT_CLIENT":
                     decodeMethod = implementationClass.getMethod("decode",String.class,String.class);
                     encodeMethod = implementationClass.getMethod("encode",String.class,String.class,Map.class,String.class,String.class);
                     break;
                 case "TCP_SERVER":
                     decodeMethod = implementationClass.getMethod("decode",String.class);
-                    encodeMethod = implementationClass.getMethod("encode",String.class,String.class,Map.class,String.class,String.class);
-                    break;
-                case "UDP_SERVER":
-                    decodeMethod = implementationClass.getMethod("decode",String.class);
-                    encodeMethod = implementationClass.getMethod("encode",String.class,String.class,Map.class,String.class,String.class);
-                    break;
-                case "COAP_SERVER":
-                    decodeMethod = implementationClass.getMethod("decode",String.class,String.class,String.class,List.class);
-                    encodeMethod = implementationClass.getMethod("encode",String.class,String.class,Map.class,String.class,String.class);
-                    break;
-                case "HTTP_SERVER":
-                    decodeMethod = implementationClass.getMethod("decode",String.class,String.class,String.class,Map.class,Map.class,String.class,Map.class);
-                    encodeMethod = implementationClass.getMethod("encode",String.class,String.class,Map.class,String.class,String.class,Integer.class,String.class);
-                    break;
-                case "WEBSOCKET_SERVER":
-                    decodeMethod = implementationClass.getMethod("decode",Integer.class,String.class,String.class);
                     encodeMethod = implementationClass.getMethod("encode",String.class,String.class,Map.class,String.class,String.class);
                     break;
                 default:
@@ -100,6 +95,7 @@ public class ProtocolManager {
                 // 同时清理其他相关资源
                 CLASS_INSTANCE.remove(protocolId);
                 DECODE_METHOD.remove(protocolId);
+                ENCODE_METHOD.remove(protocolId);
                 return true;
             } catch (IOException e) {
                 System.err.println("关闭 ClassLoader 失败: " + e.getMessage());

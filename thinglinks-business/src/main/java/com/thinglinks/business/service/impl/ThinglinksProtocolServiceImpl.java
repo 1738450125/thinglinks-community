@@ -37,13 +37,8 @@ public class ThinglinksProtocolServiceImpl extends ServiceImpl<ThinglinksProtoco
         if(!file.exists()){
             file.mkdir();
         }
-        MAIN_CLASS_PATH.put("MQTT_BROKER","com.thinglinks.protocol.parent.MqttBrokerProtocol");
         MAIN_CLASS_PATH.put("MQTT_CLIENT","com.thinglinks.protocol.parent.MqttClientProtocol");
         MAIN_CLASS_PATH.put("TCP_SERVER","com.thinglinks.protocol.parent.TcpServerProtocol");
-        MAIN_CLASS_PATH.put("UDP_SERVER","com.thinglinks.protocol.parent.UdpServerProtocol");
-        MAIN_CLASS_PATH.put("COAP_SERVER","com.thinglinks.protocol.parent.CoapServerProtocol");
-        MAIN_CLASS_PATH.put("HTTP_SERVER","com.thinglinks.protocol.parent.HttpServerProtocol");
-        MAIN_CLASS_PATH.put("WEBSOCKET_SERVER","com.thinglinks.protocol.parent.WsServerProtocol");
     }
     /**
      * 查询协议管理

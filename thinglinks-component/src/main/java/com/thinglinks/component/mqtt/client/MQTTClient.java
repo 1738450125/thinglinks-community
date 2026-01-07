@@ -2,10 +2,13 @@ package com.thinglinks.component.mqtt.client;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.thinglinks.common.utils.spring.SpringUtils;
+import com.thinglinks.component.event.EventBus;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.thinglinks.component.mqtt.client.MqttClientManager.CLIENT_DEVICE;
 
 /**
  * @Description: MQTT客户端工具类
@@ -118,6 +121,9 @@ public class MQTTClient {
 
                 @Override
                 public void connectionLost(Throwable cause) {
+                    if(CLIENT_DEVICE.getOrDefault(clientId,null)!=null){
+                        SpringUtils.getBean(EventBus.class).publish("device.offline",CLIENT_DEVICE.get(clientId));
+                    }
                     logger.warn("MQTT连接丢失: {}", cause.getMessage());
                 }
 

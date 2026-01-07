@@ -1,7 +1,6 @@
 package com.thinglinks.component.message;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.thinglinks.common.utils.StringUtils;
 
 import java.util.Date;
 

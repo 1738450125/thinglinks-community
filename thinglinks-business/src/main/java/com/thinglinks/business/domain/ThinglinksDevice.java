@@ -4,10 +4,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.thinglinks.common.annotation.Excel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.thinglinks.common.annotation.Excel;
 
 import java.util.Date;
 
@@ -128,4 +128,12 @@ public class ThinglinksDevice {
     private String retentionUnit;
     /**自定义配置*/
     private String customConfig;
+    /**经纬度*/
+    private String position;
+    /**定位地点名称*/
+    private String positionName;
+    /**modbus从站ID*/
+    private Integer slaveId;
+    /**是否开启modbus数据读取 0-关闭 1-开启*/
+    private String modbusRead;
 }

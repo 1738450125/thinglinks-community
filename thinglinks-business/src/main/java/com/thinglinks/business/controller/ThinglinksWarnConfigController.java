@@ -1,35 +1,33 @@
 package com.thinglinks.business.controller;
 
-import java.util.Date;
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
-
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.thinglinks.business.domain.ThinglinksDevice;
-import com.thinglinks.business.domain.ThinglinksProduct;
+import com.thinglinks.business.domain.ThinglinksWarnConfig;
 import com.thinglinks.business.service.IThinglinksDeviceService;
+import com.thinglinks.business.service.IThinglinksWarnConfigService;
 import com.thinglinks.business.utils.CacheUtils;
 import com.thinglinks.business.warn.WarnRule;
-import com.thinglinks.common.utils.SecurityUtils;
-import com.thinglinks.common.utils.StringUtils;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.thinglinks.common.utils.PageUtils;
 import com.thinglinks.common.annotation.Log;
 import com.thinglinks.common.core.controller.BaseController;
 import com.thinglinks.common.core.domain.AjaxResult;
-import com.thinglinks.common.enums.BusinessType;
-import com.thinglinks.business.domain.ThinglinksWarnConfig;
-import com.thinglinks.business.service.IThinglinksWarnConfigService;
-import com.thinglinks.common.utils.poi.ExcelUtil;
 import com.thinglinks.common.core.page.TableDataInfo;
+import com.thinglinks.common.enums.BusinessType;
+import com.thinglinks.common.utils.PageUtils;
+import com.thinglinks.common.utils.SecurityUtils;
+import com.thinglinks.common.utils.StringUtils;
+import com.thinglinks.common.utils.poi.ExcelUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 告警配置Controller
@@ -56,7 +54,7 @@ public class ThinglinksWarnConfigController extends BaseController
         queryWrapper.eq(StringUtils.isNotEmpty(thinglinksWarnConfig.getBelongSn()),"belong_sn",thinglinksWarnConfig.getBelongSn());
         Page<ThinglinksWarnConfig> page = new Page<ThinglinksWarnConfig>(PageUtils.getPageNum(),PageUtils.getPageSize());
         Page<ThinglinksWarnConfig> pageList = thinglinksWarnConfigService.page(page,queryWrapper);
-        return getDataTable(pageList.getRecords());
+        return getDataTable(pageList);
     }
 
     /**

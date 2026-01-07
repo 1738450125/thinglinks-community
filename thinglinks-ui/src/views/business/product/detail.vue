@@ -7,14 +7,14 @@
           <h2 class="product-title">{{ product.productName }}</h2>
           <span class="product-model">{{ product.productSn }}</span>
         </div>
-<!--        <el-switch-->
-<!--          v-model="product.status==1"-->
-<!--          active-text="已启用"-->
-<!--          inactive-text="已停用"-->
-<!--          active-color="#13ce66"-->
-<!--          inactive-color="#ff4949"-->
-<!--          @change="handleStatusChange"-->
-<!--        />-->
+        <!--        <el-switch-->
+        <!--          v-model="product.status==1"-->
+        <!--          active-text="已启用"-->
+        <!--          inactive-text="已停用"-->
+        <!--          active-color="#13ce66"-->
+        <!--          inactive-color="#ff4949"-->
+        <!--          @change="handleStatusChange"-->
+        <!--        />-->
       </div>
 
       <el-row :gutter="24" class="product-stats">
@@ -36,7 +36,7 @@
             </div>
             <div class="stat-content">
               <div class="stat-label">在线设备</div>
-              <div class="stat-value">10</div>
+              <div class="stat-value">{{ onlineDeviceCount }}</div>
             </div>
           </div>
         </el-col>
@@ -68,6 +68,63 @@
     <!-- 底部Tab切换区域 -->
     <el-card class="tab-card" shadow="hover">
       <el-tabs v-model="activeTab" @tab-click="handleTabClick" class="custom-tabs">
+        <el-tab-pane label="设备列表" name="deviceList">
+          <div class="tab-content">
+            <div class="tab-header">
+              <div class="tab-title">设备列表</div>
+              <div class="tab-actions">
+                <el-button type="primary" icon="el-icon-plus" class="action-btn" @click="addDevice">添加设备</el-button>
+              </div>
+            </div>
+            <div class="filter-bar">
+              <el-form :inline="true" class="filter-form">
+                <el-form-item label="设备名称">
+                  <el-input v-model="deviceParams.deviceName"></el-input>
+                </el-form-item>
+                <el-form-item>
+                  <el-button type="primary" icon="el-icon-search" @click="getDeviceListByProductSn" class="search-btn">查询
+                  </el-button>
+                </el-form-item>
+              </el-form>
+            </div>
+            <el-table :data="deviceList" style="width: 100%" class="data-table" stripe>
+              <el-table-column prop="deviceName" label="设备名称" width="150"/>
+              <el-table-column prop="deviceSn" label="设备SN" width="180"/>
+              <el-table-column prop="status" label="状态" width="150">
+                <template slot-scope="scope">
+                  <el-tag :type="scope.row.status == '1' ? 'success' : 'warning'" effect="dark">
+                    {{ scope.row.status == '1' ? '在线' : '离线' }}
+                  </el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column prop="createTime" label="接入时间">
+                <template slot-scope="scope">
+                  <code class="condition-code">{{ formatDateTime(scope.row.createTime) }}</code>
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" width="250" fixed="right">
+                <template slot-scope="scope">
+                  <el-button size="mini" icon="el-icon-info" @click="openDeviceDetail(scope.row.id)" class="table-action">详情
+                  </el-button>
+                  <el-button size="mini" icon="el-icon-edit" type="primary" @click="editDevice(scope.row)"
+                             class="table-action">编辑
+                  </el-button>
+                  <el-button size="mini" icon="el-icon-delete" type="danger" @click="deleteDevice(scope.row.id)"
+                             class="table-action">删除
+                  </el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+            <el-pagination
+              class="pagination"
+              :current-page="deviceParams.pageNum"
+              :page-size="deviceParams.pageSize"
+              :total="deviceParams.total"
+              layout="total, sizes, prev, pager, next, jumper"
+              @current-change="getDeviceListByProductSn"
+            />
+          </div>
+        </el-tab-pane>
         <!-- 物模型部分 -->
         <el-tab-pane label="物模型" name="thingModel">
           <div class="tab-content">
@@ -325,6 +382,23 @@
                 <el-input type="textarea" v-model="currentRule.message" placeholder="请输入告警消息"></el-input>
               </el-form-item>
 
+              <el-form-item label="执行动作">
+                <div v-for="(action, index) in currentRule.actions" :key="index" class="action-row">
+                  <el-select v-model="action.functionCode" placeholder="选择动作" style="width: 200px;">
+                    <el-option v-for="act in functionList" :key="act.functionCode" :label="act.functionName"
+                               :value="act.functionCode"></el-option>
+                  </el-select>
+                  <el-input v-model="action.functionParams" placeholder="输入参数" class="action-params"
+                            style="width: 300px;"></el-input>
+                  <el-button v-if="currentRule.actions.length > 1" type="danger" icon="el-icon-delete" circle
+                             style="margin-left: 10px;" @click="removeAction(index)"></el-button>
+                </div>
+
+                <!-- 添加执行动作按钮 -->
+                <div style="margin-top: 10px;">
+                  <el-button type="primary" icon="el-icon-plus" @click="addAction">添加执行动作</el-button>
+                </div>
+              </el-form-item>
             </el-form>
 
             <div slot="footer" class="dialog-footer">
@@ -443,11 +517,74 @@
         </el-tab-pane>
       </el-tabs>
     </el-card>
+    <el-drawer
+      :title="'新增设备'"
+      :visible.sync="openAddDevice"
+      direction="rtl"
+      size="40%"
+      :before-close="cancel"
+      class="component-drawer"
+    >
+      <div class="drawer-content">
+        <!-- 添加或修改设备对话框 -->
+        <el-form ref="deviceForm" :model="deviceForm" label-width="100px">
+          <el-form-item label="设备名称" prop="deviceName" required>
+            <el-input v-model="deviceForm.deviceName" placeholder="请输入设备名称" />
+          </el-form-item>
+          <el-form-item label="设备编码" prop="deviceSn" required>
+            <el-input v-model="deviceForm.deviceSn" placeholder="请输入设备编码" :disabled="deviceForm.id"/>
+          </el-form-item>
+          <el-form-item label="心跳时间(S)" prop="timeoutSeconds" required v-if="selectedDeviceType=='2'">
+            <el-input type="number" v-model="deviceForm.timeoutSeconds" placeholder="心跳时间(S)" />
+          </el-form-item>
+        </el-form>
+        <div class="notes-section">
+          <h4 class="notes-title">注意事项</h4>
+          <ul class="notes-list">
+            <li class="note-item">1、设备SN必须是唯一标识，不可与其他设备以及产品SN重复。</li>
+            <li class="note-item">2、设备类型会从产品直接继承，并且不可更改。</li>
+            <li class="note-item">3、物模型属性默认从产品直接继承，但设备可以自己添加独有属性，切记产品同步物模型时会覆盖设备独有属性。</li>
+            <li class="note-item">4、告警配置规则默认从产品直接继承，但设备可以自己添加独有规则，切记产品同步告警规则时会覆盖设备独有告警规则。</li>
+            <li class="note-item">5、指令下发配置默认从产品直接继承，但设备可以自己添加独有指令，切记产品同步指令下发时会覆盖设备独有指令。</li>
+            <li class="note-item">
+              <div class="device-type-item">
+                <span class="item-number">5、设备类型：</span>
+                <div class="device-type-details">
+                  <div class="type-option">
+                    <span class="type-name">直连设备：</span>
+                    <span class="type-desc">用于长连接设备，断开连接时平台将自动把设备置为离线状态。</span>
+                  </div>
+                  <div class="type-option">
+                    <span class="type-name">网关设备：</span>
+                    <span class="type-desc">用于网关设备，设备状态完全由协议管理，协议中可以返回设备的在离线状态。</span>
+                  </div>
+                  <div class="type-option">
+                    <span class="type-name">无状态设备：</span>
+                    <span class="type-desc">用于短链接或者无法获取状态的设备，无状态设备可以设置一段时间（心跳时间）未收到消息则自动离线。</span>
+                  </div>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="drawer-footer">
+          <el-button type="primary" @click="submitDeviceForm">确 定</el-button>
+          <el-button @click="cancel">取 消</el-button>
+        </div>
+      </div>
+    </el-drawer>
   </div>
 </template>
 
 <script>
-import {getProduct, syncProperties, syncRetentionTimeToDevice, updateProduct,syncCustomConfigToDevice} from "@/api/business/product"
+import {
+  getProduct,
+  syncProperties,
+  syncRetentionTimeToDevice,
+  updateProduct,
+  syncCustomConfigToDevice,
+  onlineStatics
+} from "@/api/business/product"
 import {
   listProperties,
   getProperties,
@@ -466,7 +603,18 @@ import {
 } from "@/api/business/warnConfig";
 import {listWarnRecord} from "@/api/business/warnRecord";
 import {syncWarnConfigToDevice} from "@/api/business/warnConfig";
-import {listFunction,getFunction,delFunction,addFunction,updateFunction,downFunction,syncProductToDevice} from "@/api/business/function";
+import {
+  listFunction,
+  getFunction,
+  delFunction,
+  addFunction,
+  updateFunction,
+  downFunction,
+  syncProductToDevice
+} from "@/api/business/function";
+import {listDevice, delDevice, updateDevice, addDevice, getDevice} from "@/api/business/device";
+import {getComponent} from "@/api/business/component";
+
 export default {
   name: 'ProductDetail',
   created() {
@@ -476,7 +624,7 @@ export default {
   data() {
     return {
       productId: '',
-      activeTab: 'thingModel',
+      activeTab: 'deviceList',
       product: {
         id: '',
         productName: '',
@@ -485,6 +633,7 @@ export default {
         createTime: '',
         productSn: ''
       },
+      mapDialogVisible: false, // 地图弹框显示状态
       thingModelData: [],
       dateRange: [],
       alarmLevel: '',
@@ -494,6 +643,8 @@ export default {
         size: 10,
         total: 3
       },
+      // 是否显示弹出层
+      openAddDevice: false,
       // 属性查询参数
       propertyParams: {
         pageNum: 1,
@@ -536,8 +687,7 @@ export default {
         {label: '在列表中', value: 'in'},
         {label: '不在列表中', value: 'notIn'}
       ],
-      actionOptions: [
-      ],
+      actionOptions: [],
       // 属性查询参数
       warnRecordParams: {
         warnLevel: null,
@@ -553,18 +703,34 @@ export default {
       // 其他配置示例
       logLevel: 'info',
       autoBackupEnabled: true,
-      functionList:[],
+      functionList: [],
       functionDialogVisible: false,
       functionIsEditing: false,
-      currentFunction:{
-        id:null,
-        functionName:null,
-        functionCode:null,
-        functionParams:null,
-        belongSn:null,
-        belongType:0
+      currentFunction: {
+        id: null,
+        functionName: null,
+        functionCode: null,
+        functionParams: null,
+        belongSn: null,
+        belongType: 0
       },
-      customConfig:null
+      customConfig: null,
+      onlineDeviceCount: 0,
+      deviceList: [],
+      deviceParams: {
+        pageNum: 1,
+        pageSize: 10,
+        total: 0,
+        deviceName: null,
+        deviceSn: null,
+        productSn:null
+      },
+      deviceForm:{
+
+      },
+      selectedDeviceType:null,
+      deviceIsEdit:false,
+      component:{}
     }
   },
   computed: {
@@ -579,6 +745,72 @@ export default {
     }
   },
   methods: {
+    // 处理地图选址确认
+    handleMapConfirm(data) {
+      this.deviceForm.position = data.position; // 填充经纬度
+      this.deviceForm.positionName = data.positionName; // 填充中文地点
+      this.mapDialogVisible = false; // 关闭弹框
+    },
+    // 可选：点击输入框区域也打开弹框
+    handleInputClick(e) {
+      // 避免点击输入框时和图标事件冲突（可选）
+      this.mapDialogVisible = true;
+    },
+    getDeviceListByProductSn() {
+      this.deviceParams.productSn = this.product.productSn
+      listDevice(this.deviceParams).then(res => {
+        if(res?.code==200){
+          this.deviceList = res?.rows;
+          this.deviceParams.total = res?.total
+        }
+      })
+    },
+    /** 提交按钮 */
+    submitDeviceForm() {
+      this.$refs["deviceForm"].validate(valid => {
+        if (valid) {
+          if (this.deviceForm.id != null) {
+            updateDevice(this.deviceForm).then(response => {
+              this.$modal.msgSuccess("修改成功")
+              this.openAddDevice = false
+              this.getDeviceListByProductSn()
+            })
+          } else {
+            addDevice(this.deviceForm).then(response => {
+              this.$modal.msgSuccess("新增成功")
+              this.openAddDevice = false
+              this.getDeviceListByProductSn()
+            })
+          }
+        }
+      })
+    },
+    // 取消按钮
+    cancel() {
+      this.openAddDevice = false
+      this.resetAddDevice()
+    },
+    resetAddDevice(){
+      this.deviceForm = {
+        id: null,
+        deviceSn: null,
+        deviceName: null,
+        productId: null,
+        productName: null,
+        productSn: null,
+        createTime: null,
+        createBy: null,
+        updateTime: null,
+        updateBy: null,
+        linkMethodId: null,
+        linkMethodName: null,
+        protocolId: null,
+        protocolName: null,
+        status: null
+      }
+      this.selectedDeviceType = null
+      this.resetForm("deviceForm")
+    },
     handleStatusChange(value) {
       console.log(value)
       this.$message.success(value ? '产品已启用' : '产品已停用')
@@ -588,6 +820,19 @@ export default {
         this.product = res.data
         this.getPropertyList();
         this.getPropertyByProductSn();
+        this.getDeviceListByProductSn();
+        this.onlineDeviceStatics();
+        this.getComponentById();
+      })
+    },
+    getComponentById(){
+      getComponent(this.product.componentId).then(res=>{
+        this.component = res?.data
+      })
+    },
+    onlineDeviceStatics() {
+      onlineStatics(this.product.productSn).then(res => {
+        this.onlineDeviceCount = res?.data
       })
     },
     getPropertyList() {
@@ -620,16 +865,21 @@ export default {
 
       return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
     },
-    syncCustomConfigToDevice(){
-      syncCustomConfigToDevice({customConfig:this.customConfig,productSn:this.product.productSn}).then(res=>{
-        if(res?.code==200){
+    syncCustomConfigToDevice() {
+      syncCustomConfigToDevice({customConfig: this.customConfig, productSn: this.product.productSn}).then(res => {
+        if (res?.code == 200) {
           this.$message.success("同步成功")
-        }else {
+        } else {
           this.$message.error(res?.msg)
         }
       })
     },
     handleTabClick(tab) {
+      //设备列表页
+      if (tab.name === 'deviceList') {
+        //初始化数据
+        this.getDeviceListByProductSn();
+      }
       //告警配置页面
       if (tab.name === 'alarmConfig') {
         //初始化数据
@@ -655,15 +905,15 @@ export default {
       }
     },
     //指令下发列表查询
-    getFunctionList(){
-      listFunction({pageNum:1,pageSize: 10000,belongSn:this.product.productSn}).then(res=>{
+    getFunctionList() {
+      listFunction({pageNum: 1, pageSize: 10000, belongSn: this.product.productSn}).then(res => {
         this.functionList = res?.rows;
       })
     },
     //同步产品指令配置到设备
-    syncProductFunctionToDevice(){
-      syncProductToDevice({belongSn:this.product.productSn}).then(res=>{
-        if(res?.code==200){
+    syncProductFunctionToDevice() {
+      syncProductToDevice({belongSn: this.product.productSn}).then(res => {
+        if (res?.code == 200) {
           this.$message.success("同步成功");
         }
       })
@@ -847,10 +1097,33 @@ export default {
       this.dialogVisible = true;
       this.getFunctionList();
     },
+    openDeviceDetail(id) {
+      this.$router.push({
+        path: '/deviceManage/device/detail/index',
+        query: {
+          id: id
+        }
+      });
+    },
     editFunction(data) {
       this.functionIsEditing = true;
       this.currentFunction = data;
       this.functionDialogVisible = true;
+    },
+    addDevice(){
+      this.deviceIsEdit = false
+      this.openAddDevice = true;
+      this.resetAddDevice()
+      this.selectedDeviceType = this.product.deviceType;
+      this.deviceForm.productId = this.product.id
+      this.deviceForm.timeoutSeconds = this.product.timeoutSeconds
+    },
+    editDevice(item){
+      this.deviceIsEdit = true
+      this.openAddDevice = true;
+      getDevice(item.id).then(response => {
+        this.deviceForm = response.data
+      })
     },
     saveAlarmRule() {
       // 验证表单
@@ -928,6 +1201,20 @@ export default {
         })
       });
     },
+    deleteDevice(id) {
+      this.$confirm('确定要删除此设备吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        delDevice(id).then(res => {
+          if (res?.code === 200) {
+            this.getDeviceListByProductSn();
+            this.$message.success('删除成功');
+          }
+        })
+      });
+    },
     deleteFunction(data) {
       this.$confirm('确定要删除这条指令配置吗?', '提示', {
         confirmButtonText: '确定',
@@ -956,6 +1243,15 @@ export default {
       if (this.currentRule.conditions.length > 1) {
         this.currentRule.conditions.splice(index, 1);
       }
+    },
+    addAction() {
+      this.currentRule.actions.push({
+        functionCode: '',
+        functionParams: ''
+      })
+    },
+    removeAction(index) {
+      this.currentRule.actions.splice(index, 1)
     },
     searchAlarms() {
       this.$message.info('查询告警记录')
@@ -1193,6 +1489,13 @@ export default {
   padding-left: 12px;
 }
 
+.tab-tip {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffa600;
+  position: relative;
+  padding-left: 12px;
+}
 .tab-title::before {
   content: '';
   position: absolute;
@@ -1425,11 +1728,13 @@ export default {
   gap: 12px;
   flex-wrap: wrap;
 }
-.config-input{
+
+.config-input {
   display: flex;
   flex-wrap: wrap;
   max-width: 100%;
 }
+
 .retention-config {
   display: flex;
   align-items: center;
@@ -1538,4 +1843,101 @@ export default {
   color: #606266;
   font-weight: normal;
 }
+/* 抽屉样式 */
+.component-drawer ::v-deep .el-drawer {
+  overflow-y: auto;
+}
+
+.drawer-content {
+  padding: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.drawer-footer {
+  margin-top: auto;
+  padding: 20px 0;
+  text-align: right;
+}
+
+/* 响应式调整 */
+@media screen and (max-width: 768px) {
+  .component-drawer ::v-deep .el-drawer {
+    width: 85% !important;
+  }
+}
+.notes-section {
+  margin: 20px 0;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid #838383;
+}
+
+.notes-title {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.notes-list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.note-item {
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #606266;
+  line-height: 1.5;
+}
+
+.note-item:last-child {
+  margin-bottom: 0;
+}
+
+.device-type-item {
+  line-height: 1.6;
+}
+
+.item-number {
+  font-weight: 500;
+  color: #303133;
+}
+
+.device-type-details {
+  margin-top: 8px;
+  margin-left: 8px;
+}
+
+.type-option {
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e4e7ed;
+}
+
+.type-option:last-child {
+  margin-bottom: 0;
+}
+
+.type-name {
+  font-weight: 500;
+  color: #409eff;
+  display: inline-block;
+  min-width: 80px;
+}
+.tixing {
+  font-weight: 500;
+  color: #ff8c00;
+  display: inline-block;
+  min-width: 80px;
+}
+.type-desc {
+  color: #606266;
+}
+
 </style>

@@ -2,9 +2,7 @@ package com.thinglinks.business.down;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.thinglinks.business.domain.ThinglinksDeviceLogs;
-import com.thinglinks.business.domain.ThinglinksFunction;
-import com.thinglinks.business.domain.ThinglinksFunctionRecord;
+import com.thinglinks.business.domain.*;
 import com.thinglinks.business.service.IThinglinksDeviceLogsService;
 import com.thinglinks.business.service.IThinglinksFunctionRecordService;
 import com.thinglinks.business.service.IThinglinksFunctionService;
@@ -26,7 +24,7 @@ import java.util.Map;
 
 /**
  * @Description: 设备功能下发工具
- * @Author: chen tao
+ * @Author: ruoyi
  * @CreateTime: 2025-10-25
  */
 public class DeviceDownUtils {

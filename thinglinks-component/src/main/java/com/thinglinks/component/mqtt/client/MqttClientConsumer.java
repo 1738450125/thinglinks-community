@@ -57,8 +57,9 @@ public class MqttClientConsumer {
                 if (decodeMessage == null) {
                     return;
                 }
-//                    List<PropertyNode> propertyNodes = PropertyToJson.PROPERTY_TREE.get(decodeMessage.getDeviceSn());
-//                    String propertyJson = PropertyToJson.convertToJson(propertyNodes,decodeMessage.getProperties());
+                if(StringUtils.isNotEmpty(decodeMessage.getDeviceSn())){
+                    MqttClientManager.bindDevice(clientId,decodeMessage.getDeviceSn());
+                }
                 threadPoolTaskExecutor.execute(() -> {
                     WebSocketServer.broadcast("device", decodeMessage.getDeviceSn(), JSONObject.toJSONString(decodeMessage));
                 });

@@ -1,16 +1,15 @@
 package com.thinglinks.business.domain;
 
-import java.util.Date;
-
-
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.thinglinks.common.annotation.Excel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.baomidou.mybatisplus.annotation.TableName;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import com.thinglinks.common.annotation.Excel;
+
+import java.util.Date;
 
 /**
  * 设备日志对象 thinglinks_device_logs

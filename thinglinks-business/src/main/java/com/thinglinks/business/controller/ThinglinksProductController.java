@@ -1,14 +1,5 @@
 package com.thinglinks.business.controller;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import javax.servlet.http.HttpServletResponse;
-
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -17,19 +8,25 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.thinglinks.business.domain.*;
 import com.thinglinks.business.service.*;
 import com.thinglinks.business.utils.CacheUtils;
-import com.thinglinks.common.utils.PageUtils;
-import com.thinglinks.common.utils.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import com.thinglinks.common.annotation.Log;
 import com.thinglinks.common.core.controller.BaseController;
 import com.thinglinks.common.core.domain.AjaxResult;
-import com.thinglinks.common.enums.BusinessType;
-import com.thinglinks.common.utils.poi.ExcelUtil;
 import com.thinglinks.common.core.page.TableDataInfo;
+import com.thinglinks.common.utils.PageUtils;
+import com.thinglinks.common.utils.StringUtils;
+import com.thinglinks.common.utils.poi.ExcelUtil;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 产品Controller
@@ -65,7 +62,7 @@ public class ThinglinksProductController extends BaseController {
         queryWrapper.orderByAsc("create_time");
         Page<ThinglinksProduct> page = new Page<ThinglinksProduct>(PageUtils.getPageNum(), PageUtils.getPageSize());
         Page<ThinglinksProduct> pageList = thinglinksProductService.page(page, queryWrapper);
-        return getDataTable(pageList.getRecords());
+        return getDataTable(pageList);
     }
 
     /**
@@ -121,6 +118,7 @@ public class ThinglinksProductController extends BaseController {
                     .set(ThinglinksDevice::getComponentName,component.getName())
                     .set(ThinglinksDevice::getProtocolId,component.getProtocolId())
                     .set(ThinglinksDevice::getProtocolName,component.getProtocolName()));
+            CacheUtils.updateDeviceCacheByProductSn(thinglinksProduct.getProductSn());
         }
         return toAjax(thinglinksProductService.updateById(thinglinksProduct));
     }
@@ -219,7 +217,7 @@ public class ThinglinksProductController extends BaseController {
     @GetMapping("/indexStatics")
     public AjaxResult indexStatics() {
         // 创建计数器
-        CountDownLatch latch = new CountDownLatch(4);
+        CountDownLatch latch = new CountDownLatch(5);
 
         // 使用原子类保证线程安全
         AtomicLong productCount = new AtomicLong(0);
@@ -286,5 +284,16 @@ public class ThinglinksProductController extends BaseController {
         result.put("protocolCount", protocolCount.get());
         result.put("todayMessageCount", todayMessageCount.get());
         return AjaxResult.success(result);
+    }
+
+    /**
+     * 在线设备
+     */
+    @GetMapping("/onlineDeviceCount")
+    public AjaxResult onlineDeviceCount(@RequestParam String productSn){
+        long onlineCount = thinglinksDeviceService.count(new LambdaQueryWrapper<ThinglinksDevice>()
+                .eq(ThinglinksDevice::getProductSn,productSn)
+                .eq(ThinglinksDevice::getStatus,"1"));
+        return AjaxResult.success(onlineCount);
     }
 }

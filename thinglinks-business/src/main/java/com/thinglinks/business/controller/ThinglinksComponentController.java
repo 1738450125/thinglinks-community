@@ -1,31 +1,27 @@
 package com.thinglinks.business.controller;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.thinglinks.business.domain.ThinglinksComponent;
 import com.thinglinks.business.domain.ThinglinksProtocol;
+import com.thinglinks.business.service.IThinglinksComponentService;
 import com.thinglinks.business.service.IThinglinksProtocolService;
-import com.thinglinks.common.annotation.Anonymous;
-import com.thinglinks.common.exception.CommonWarnException;
+import com.thinglinks.common.core.controller.BaseController;
+import com.thinglinks.common.core.domain.AjaxResult;
+import com.thinglinks.common.core.page.TableDataInfo;
 import com.thinglinks.common.utils.PageUtils;
 import com.thinglinks.common.utils.StringUtils;
+import com.thinglinks.common.utils.poi.ExcelUtil;
 import com.thinglinks.component.utils.PortChecker;
-import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import com.thinglinks.common.core.controller.BaseController;
-import com.thinglinks.common.core.domain.AjaxResult;
-import com.thinglinks.business.domain.ThinglinksComponent;
-import com.thinglinks.business.service.IThinglinksComponentService;
-import com.thinglinks.common.utils.poi.ExcelUtil;
-import com.thinglinks.common.core.page.TableDataInfo;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 网络组件Controller
@@ -52,7 +48,7 @@ public class ThinglinksComponentController extends BaseController
         queryWrapper.orderByAsc("create_time");
         Page<ThinglinksComponent> page = new Page<ThinglinksComponent>(PageUtils.getPageNum(),PageUtils.getPageSize());
         Page<ThinglinksComponent> pageList = thinglinksComponentService.page(page,queryWrapper);
-        return getDataTable(pageList.getRecords());
+        return getDataTable(pageList);
     }
 
     /**
@@ -80,7 +76,7 @@ public class ThinglinksComponentController extends BaseController
      */
     @PostMapping
     @Transactional(rollbackFor = Exception.class)
-    public AjaxResult add(@RequestBody ThinglinksComponent thinglinksComponent) throws IOException, CommonWarnException {
+    public AjaxResult add(@RequestBody ThinglinksComponent thinglinksComponent) throws Exception {
         thinglinksComponentService.save(thinglinksComponent);
         if("1".equals(thinglinksComponent.getStatus())) {
             boolean isOk = thinglinksComponentService.openComponent(thinglinksComponent.getId());
@@ -99,7 +95,7 @@ public class ThinglinksComponentController extends BaseController
      */
     @PutMapping
     @Transactional(rollbackFor = Exception.class)
-    public AjaxResult edit(@RequestBody ThinglinksComponent thinglinksComponent) throws CommonWarnException, IOException, MqttException {
+    public AjaxResult edit(@RequestBody ThinglinksComponent thinglinksComponent) throws Exception {
         thinglinksComponentService.updateById(thinglinksComponent);
         if("1".equals(thinglinksComponent.getStatus())) {
             thinglinksComponentService.closeComponent(thinglinksComponent.getId());
@@ -138,7 +134,7 @@ public class ThinglinksComponentController extends BaseController
      */
     @PutMapping("/control")
     public AjaxResult controlComponent(@RequestParam String id,
-                                       @RequestParam String status) throws MqttException, IOException, CommonWarnException {
+                                       @RequestParam String status) throws Exception {
         if("0".equals(status)){
             thinglinksComponentService.closeComponent(id);
         }else {

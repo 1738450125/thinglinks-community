@@ -5,18 +5,22 @@ package com.thinglinks.component.mqtt.client;
  * @Author: thinglinks
  * @CreateTime: 2025-09-15
  */
+
 import com.thinglinks.common.utils.spring.SpringUtils;
 import lombok.Data;
-import org.eclipse.paho.client.mqttv3.*;
+import org.eclipse.paho.client.mqttv3.MqttException;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Data
 public class MqttClientManager {
     public static Map<String, MQTTClient> clientMap = new ConcurrentHashMap<>();
     public static Map<String, MqttClientConfig> configMap = new ConcurrentHashMap<>();
-
+    public static Map<String, Set<String>> CLIENT_DEVICE = new HashMap<>();
     // 添加MQTT连接
     public static boolean addConnection(MqttClientConfig config) {
         try {
@@ -76,6 +80,19 @@ public class MqttClientManager {
             return true;
         }catch (Exception e){
             return false;
+        }
+    }
+    /**
+     * 绑定设备
+     */
+    public static void bindDevice(String clientId,String deviceSn){
+        Set<String> set = CLIENT_DEVICE.getOrDefault(clientId,null);
+        if(set!=null){
+            set.add(deviceSn);
+        }else {
+            Set<String> deviceSet = new HashSet<>();
+            deviceSet.add(deviceSn);
+            CLIENT_DEVICE.put(clientId,deviceSet);
         }
     }
 }

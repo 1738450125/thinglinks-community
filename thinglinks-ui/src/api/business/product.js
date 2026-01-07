@@ -77,3 +77,12 @@ export function indexStatics() {
     method: 'get'
   })
 }
+
+// 在线设备统计
+export function onlineStatics(data) {
+  return request({
+    url: '/business/product/onlineDeviceCount?productSn='+data,
+    method: 'get'
+  })
+}
+

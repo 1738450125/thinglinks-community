@@ -29,6 +29,8 @@ import javax.annotation.PostConstruct;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @Description:
@@ -52,20 +54,10 @@ public class DeviceUpListener {
     @PostConstruct
     public void subscribeToEvents(){
         // 订阅所有设备消息
-        eventBus.subscribe("device.up", this::handleDeviceMessage);
         eventBus.subscribe("device.up", this::saveMessage);
         eventBus.subscribe("device.up", this::deviceStatus);
         eventBus.subscribe("device.up", this::ruleWarn);
         eventBus.subscribe("device.offline", this::directlyConnectedOffline);
-    }
-
-    public void handleDeviceMessage(Object event) {
-        if (event instanceof MessageUpEvent) {
-            MessageUpEvent message = (MessageUpEvent) event;
-            // 打印消息
-            System.out.println(message.getTopic());
-            System.out.println(message.getData());
-        }
     }
 
     /**
@@ -78,14 +70,16 @@ public class DeviceUpListener {
                 MessageUpEvent message = (MessageUpEvent) event;
                 if(message.getData() instanceof DecodeMessage) {
                     DecodeMessage decodeMessage = (DecodeMessage) message.getData();
-                    // 保存设备消息
-                    ThinglinksDeviceLogs logs = new ThinglinksDeviceLogs();
-                    logs.setDeviceSn(decodeMessage.getDeviceSn());
-                    logs.setLogType(DeviceLogType.PROPERTY.name());
-                    logs.setCreateTime(new Date());
-                    logs.setReportTime(decodeMessage.getReportTime());
-                    logs.setProperties(JSONObject.toJSONString(decodeMessage));
-                    thinglinksDeviceLogsService.save(logs);
+                    if(decodeMessage.getIsStore()) {
+                        // 保存设备消息
+                        ThinglinksDeviceLogs logs = new ThinglinksDeviceLogs();
+                        logs.setDeviceSn(decodeMessage.getDeviceSn());
+                        logs.setLogType(DeviceLogType.PROPERTY.name());
+                        logs.setCreateTime(new Date());
+                        logs.setReportTime(decodeMessage.getReportTime());
+                        logs.setProperties(JSONObject.toJSONString(decodeMessage));
+                        thinglinksDeviceLogsService.save(logs);
+                    }
                 }
             }
         });
@@ -154,6 +148,9 @@ public class DeviceUpListener {
                 MessageUpEvent message = (MessageUpEvent) event;
                 if(message.getData() instanceof DecodeMessage) {
                     DecodeMessage decodeMessage = (DecodeMessage) message.getData();
+                    if(!decodeMessage.getIsStore()){
+                        return;
+                    }
                     //用全属性缓存来计算
                     DecodeMessage lastData = MessageCache.getDeviceLastData(decodeMessage.getDeviceSn());
                     List<PropertyNode> propertyNodes = PropertyToJson.PROPERTY_TREE.get(decodeMessage.getDeviceSn());
@@ -207,6 +204,22 @@ public class DeviceUpListener {
                 logs.setCreateTime(new Date());
                 logs.setReportTime(new Date());
                 thinglinksDeviceLogsService.save(logs);
+            }
+            if (event instanceof Set) {
+                Set<String> deviceSnList = (Set<String>) event;
+                thinglinksDeviceService.update(new LambdaUpdateWrapper<ThinglinksDevice>()
+                        .in(ThinglinksDevice::getDeviceSn, deviceSnList)
+                        .set(ThinglinksDevice::getStatus, "0"));
+                deviceSnList.forEach(deviceSn->{
+                    CacheUtils.updateDeviceStatusCache(deviceSn, false);
+                    //保存上下线消息
+                    ThinglinksDeviceLogs logs = new ThinglinksDeviceLogs();
+                    logs.setDeviceSn(deviceSn);
+                    logs.setLogType(DeviceLogType.OFFLINE.name());
+                    logs.setCreateTime(new Date());
+                    logs.setReportTime(new Date());
+                    thinglinksDeviceLogsService.save(logs);
+                });
             }
         });
     }

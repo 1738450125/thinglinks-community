@@ -1,8 +1,8 @@
 package com.thinglinks.component.message;
 
-import com.alibaba.fastjson2.JSONObject;
 import com.thinglinks.common.utils.StringUtils;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,11 +28,21 @@ public class MessageCache {
     public static void setDeviceLastData(String deviceSn,DecodeMessage decodeMessage){
         DecodeMessage oldData = DEVICE_LAST_DATA.getOrDefault(deviceSn,null);
         if(oldData==null|| StringUtils.isEmpty(oldData.getDeviceSn())||oldData.getProperties()==null){
+            decodeMessage.setReportTime(decodeMessage.getReportTime()==null?new Date():decodeMessage.getReportTime());
             DEVICE_LAST_DATA.put(deviceSn,decodeMessage);
         }else {
             decodeMessage.getProperties().keySet().forEach(key->{
                 oldData.getProperties().put(key,decodeMessage.getProperties().get(key));
             });
+            oldData.setDeviceSn(decodeMessage.getDeviceSn());
+            oldData.setReportTime(decodeMessage.getReportTime()==null?new Date():decodeMessage.getReportTime());
+            oldData.setDeviceRegister(decodeMessage.getDeviceRegister());
+            oldData.setCoapIsRecover(decodeMessage.getCoapIsRecover());
+            oldData.setIsStore(decodeMessage.getIsStore());
+            oldData.setIsOnline(decodeMessage.getIsOnline());
+            oldData.setIsRegister(decodeMessage.getIsRegister());
+            oldData.setCoapRecoverContent(decodeMessage.getCoapRecoverContent());
+            oldData.setHttpReply(decodeMessage.getHttpReply());
         }
     }
 }

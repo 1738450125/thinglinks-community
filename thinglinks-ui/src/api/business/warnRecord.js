@@ -42,3 +42,12 @@ export function delWarnRecord(id) {
     method: 'delete'
   })
 }
+
+// 处理告警记录
+export function dealWarmRecord(id) {
+  return request({
+    url: '/business/warnRecord/deal/' + id,
+    method: 'put',
+    data:{}
+  })
+}

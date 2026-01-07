@@ -44,10 +44,27 @@ public class CacheUtils {
     public final static Map<String,List<WarnRule>> DEVICE_WARN_RULE = new HashMap<>();
 
     /**
+     * 设备联动告警规则
+     */
+    public final static Map<String,List<WarnRule>> DEVICE_LINK_WARN_RULE = new HashMap<>();
+
+    /**
      * 更新所有设备实例数据
      */
     public static void updateAllDeviceCache(){
         List<ThinglinksDevice> list = SpringUtils.getBean(IThinglinksDeviceService.class).list();
+        DEVICE_MAP.clear();
+        list.forEach(device->{
+            DEVICE_MAP.put(device.getDeviceSn(),device);
+        });
+    }
+
+    /**
+     * 更新设备实例数据根据产品
+     */
+    public static void updateDeviceCacheByProductSn(String productSn){
+        List<ThinglinksDevice> list = SpringUtils.getBean(IThinglinksDeviceService.class).list(new LambdaQueryWrapper<ThinglinksDevice>()
+                .eq(ThinglinksDevice::getProductSn,productSn));
         DEVICE_MAP.clear();
         list.forEach(device->{
             DEVICE_MAP.put(device.getDeviceSn(),device);
@@ -105,6 +122,19 @@ public class CacheUtils {
      */
     public static ThinglinksDevice getDeviceBySn(String deviceSn){
         return DEVICE_MAP.getOrDefault(deviceSn,null);
+    }
+
+    /**
+     * 获取设备实例数据
+     */
+    public static List<ThinglinksDevice> getDeviceByProductSn(String productSn){
+        List<ThinglinksDevice> list = new ArrayList<>();
+        DEVICE_MAP.values().forEach(device->{
+            if(productSn.equals(device.getProductSn())){
+                list.add(device);
+            }
+        });
+        return list;
     }
 
     /**

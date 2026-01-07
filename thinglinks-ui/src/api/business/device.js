@@ -35,6 +35,15 @@ export function updateDevice(data) {
   })
 }
 
+// 修改设备从站ID
+export function updateDeviceSlaveId(data) {
+  return request({
+    url: '/business/device/updateSlaveId',
+    method: 'put',
+    data: data
+  })
+}
+
 // 删除设备
 export function delDevice(id) {
   return request({

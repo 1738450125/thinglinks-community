@@ -1,31 +1,23 @@
 package com.thinglinks.business.controller;
 
-import java.util.List;
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletResponse;
-
-import com.thinglinks.common.utils.StringUtils;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.thinglinks.common.utils.PageUtils;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.thinglinks.business.domain.ThinglinksWarnRecord;
+import com.thinglinks.business.service.IThinglinksWarnRecordService;
 import com.thinglinks.common.annotation.Log;
 import com.thinglinks.common.core.controller.BaseController;
 import com.thinglinks.common.core.domain.AjaxResult;
-import com.thinglinks.common.enums.BusinessType;
-import com.thinglinks.business.domain.ThinglinksWarnRecord;
-import com.thinglinks.business.service.IThinglinksWarnRecordService;
-import com.thinglinks.common.utils.poi.ExcelUtil;
 import com.thinglinks.common.core.page.TableDataInfo;
+import com.thinglinks.common.enums.BusinessType;
+import com.thinglinks.common.utils.PageUtils;
+import com.thinglinks.common.utils.StringUtils;
+import com.thinglinks.common.utils.poi.ExcelUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * 告警记录Controller
@@ -43,11 +35,11 @@ public class ThinglinksWarnRecordController extends BaseController
     /**
      * 查询告警记录列表
      */
-    @PreAuthorize("@ss.hasPermi('business:warnRecord:list')")
     @GetMapping("/list")
     public TableDataInfo list(ThinglinksWarnRecord thinglinksWarnRecord)
     {
         QueryWrapper<ThinglinksWarnRecord> queryWrapper = new QueryWrapper<>();
+        queryWrapper.orderByAsc("status");
         queryWrapper.orderByDesc("create_time");
         queryWrapper.eq(StringUtils.isNotEmpty(thinglinksWarnRecord.getWarnLevel()),"warn_level",thinglinksWarnRecord.getWarnLevel());
         queryWrapper.eq(StringUtils.isNotEmpty(thinglinksWarnRecord.getBelongSn()),"belong_sn",thinglinksWarnRecord.getBelongSn());
@@ -61,7 +53,6 @@ public class ThinglinksWarnRecordController extends BaseController
     /**
      * 导出告警记录列表
      */
-    @PreAuthorize("@ss.hasPermi('business:warnRecord:export')")
     @Log(title = "告警记录", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, ThinglinksWarnRecord thinglinksWarnRecord)
@@ -74,7 +65,6 @@ public class ThinglinksWarnRecordController extends BaseController
     /**
      * 获取告警记录详细信息
      */
-    @PreAuthorize("@ss.hasPermi('business:warnRecord:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") String id)
     {
@@ -84,7 +74,6 @@ public class ThinglinksWarnRecordController extends BaseController
     /**
      * 新增告警记录
      */
-    @PreAuthorize("@ss.hasPermi('business:warnRecord:add')")
     @Log(title = "告警记录", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody ThinglinksWarnRecord thinglinksWarnRecord)
@@ -95,7 +84,6 @@ public class ThinglinksWarnRecordController extends BaseController
     /**
      * 修改告警记录
      */
-    @PreAuthorize("@ss.hasPermi('business:warnRecord:edit')")
     @Log(title = "告警记录", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody ThinglinksWarnRecord thinglinksWarnRecord)
@@ -106,11 +94,24 @@ public class ThinglinksWarnRecordController extends BaseController
     /**
      * 删除告警记录
      */
-    @PreAuthorize("@ss.hasPermi('business:warnRecord:remove')")
     @Log(title = "告警记录", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable String[] ids)
     {
         return toAjax(thinglinksWarnRecordService.deleteThinglinksWarnRecordByIds(ids));
+    }
+
+    /**
+     * 标记处理状态
+     */
+    @Log(title = "标记处理状态", businessType = BusinessType.UPDATE)
+    @PutMapping("/deal/{id}")
+    public AjaxResult deal(@PathVariable String id)
+    {
+        thinglinksWarnRecordService.update(new LambdaUpdateWrapper<ThinglinksWarnRecord>()
+                .eq(ThinglinksWarnRecord::getId,id)
+                .set(ThinglinksWarnRecord::getStatus,"1")
+        );
+        return AjaxResult.success();
     }
 }

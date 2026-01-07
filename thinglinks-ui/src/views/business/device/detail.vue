@@ -17,28 +17,6 @@
       </div>
 
       <el-row :gutter="24" class="device-stats">
-<!--        <el-col :xs="12" :sm="6">-->
-<!--          <div class="stat-item">-->
-<!--            <div class="stat-icon">-->
-<!--              <i class="el-icon-cpu"></i>-->
-<!--            </div>-->
-<!--            <div class="stat-content">-->
-<!--              <div class="stat-label">设备数量</div>-->
-<!--              <div class="stat-value">{{ device.deviceCount }}</div>-->
-<!--            </div>-->
-<!--          </div>-->
-<!--        </el-col>-->
-<!--        <el-col :xs="12" :sm="6">-->
-<!--          <div class="stat-item">-->
-<!--            <div class="stat-icon online">-->
-<!--              <i class="el-icon-success"></i>-->
-<!--            </div>-->
-<!--            <div class="stat-content">-->
-<!--              <div class="stat-label">在线设备</div>-->
-<!--              <div class="stat-value">10</div>-->
-<!--            </div>-->
-<!--          </div>-->
-<!--        </el-col>-->
         <el-col :xs="12" :sm="6">
           <div class="stat-item">
             <div class="stat-icon">
@@ -72,7 +50,7 @@
           <div class="tab-content">
             <div class="tab-header">
               <div class="tab-title">实时数据</div>
-              <el-button @click="openHistoryData">历史数据</el-button>
+              <el-button type="primary" @click="openHistoryData">历史数据</el-button>
             </div>
             <!-- 属性卡片网格 -->
             <div class="property-cards-grid">
@@ -247,14 +225,14 @@
                 <div class="form-label">选择指令：</div>
                 <div class="form-control">
                   <el-select
-                    v-model="selectedCommand"
+                    v-model="selectedCommand.id"
                     placeholder="请选择要下发的指令"
                     style="width: 100%">
                     <el-option
                       v-for="item in functionList"
                       :key="item.id"
                       :label="item.functionName"
-                      :value="item">
+                      :value="item.id">
                     </el-option>
                   </el-select>
                 </div>
@@ -328,7 +306,7 @@
               <el-table-column prop="triggerType" label="触发类型" width="150">
                 <template slot-scope="scope">
                   <el-tag :type="'warn'" effect="dark">
-                    {{ scope.row.triggerType === '1' ? '告警触发' : '手动触发' }}
+                    {{ getTriggerText(scope.row.triggerType) }}
                   </el-tag>
                 </template>
               </el-table-column>
@@ -532,7 +510,7 @@
                     size="mini"
                     icon="el-icon-check"
                     type="success"
-                    @click="resolveAlarm(scope.row)"
+                    @click="handleStatus(scope.row)"
                     class="table-action"
                   >
                     标记处理
@@ -778,7 +756,7 @@
 
 <script>
 import {getDeviceLastData, getPropertyBySn, listProperties, saveBatch} from "@/api/business/properties"
-import {editCustomConfig, editRetentionTime, getDevice, updateDevice} from "@/api/business/device";
+import {editCustomConfig, editRetentionTime, getDevice, updateDevice,updateDeviceSlaveId} from "@/api/business/device";
 import {formatDateTime} from "@/utils/date";
 import {listFunctionRecord,delFunctionRecord,getFunctionRecord,updateFunctionRecord,addFunctionRecord} from "@/api/business/functionRecord";
 import {
@@ -788,11 +766,11 @@ import {
   toggleRuleStatus,
   updateWarnConfig
 } from "@/api/business/warnConfig";
-import {listWarnRecord} from "@/api/business/warnRecord";
+import {listWarnRecord,dealWarmRecord} from "@/api/business/warnRecord";
 import {listDeviceLogs} from "@/api/business/deviceLogs";
 import {createWebSocket} from '@/utils/websocket'
 import {listFunction,getFunction,delFunction,addFunction,updateFunction,downFunction,syncProductToDevice} from "@/api/business/function";
-import {syncRetentionTimeToDevice, updateProduct} from "@/api/business/product";
+import {getComponent} from "@/api/business/component";
 export default {
   name: 'DeviceDetail',
   created() {
@@ -964,7 +942,10 @@ export default {
         belongSn: null
       },
       customConfig:null,
-      functionRecordList:[]
+      functionRecordList:[],
+      component:{},
+      isEditingSlaveId: false, // 控制从站ID编辑状态
+      tempSlaveId: '', // 暂存编辑的从站ID（避免直接修改原数据）
     }
   },
   methods: {
@@ -974,6 +955,12 @@ export default {
         this.getPropertyList();
         this.connectSocket();
         this.getPropertyByDeviceSn();
+        this.getComponentById();
+      })
+    },
+    getComponentById(){
+      getComponent(this.device.componentId).then(res=>{
+        this.component = res?.data
       })
     },
     getPropertyList(){
@@ -999,6 +986,14 @@ export default {
         '2': '严重',
         '3': '警告',
         '4': '正常'
+      };
+      return textMap[level] || '未知';
+    },
+    getTriggerText(level) {
+      const textMap = {
+        '0': '手动触发',
+        '1': '告警触发',
+        '2': '定时触发',
       };
       return textMap[level] || '未知';
     },
@@ -1117,6 +1112,7 @@ export default {
         retentionUnit: this.retentionUnit
       }).then(res => {
         if (res?.code == 200) {
+          this.getDeviceById(this.deviceId);
           this.$message.success('保存成功')
         }
       })
@@ -1127,6 +1123,7 @@ export default {
         customConfig: this.customConfig,
       }).then(res => {
         if (res?.code == 200) {
+          this.getDeviceById(this.deviceId);
           this.$message.success('保存成功')
         }
       })
@@ -1146,7 +1143,8 @@ export default {
       });
     },
     handleCommandSubmit(){
-      downFunction({functionCode:this.selectedCommand.functionCode,functionParams:this.selectedCommand.functionParams,belongSn:this.device.deviceSn}).then(res=>{
+      let funtionData = this.functionList.find(o=>o.id == this.selectedCommand.id)
+      downFunction({functionCode:funtionData.functionCode,functionParams:this.selectedCommand.functionParams,belongSn:this.device.deviceSn}).then(res=>{
         if(res?.code==200){
           this.$message.success("下发成功")
         }else {
@@ -1347,15 +1345,12 @@ export default {
       this.jsonViewerVisible = true;
     },
 
-    resolveAlarm(row) {
-      this.$confirm('标记此告警为已处理?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        row.status = 'resolved'
-        this.$message.success('操作成功')
-      })
+    /** 处理按钮操作 */
+    handleStatus(row) {
+      dealWarmRecord(row?.id).then(() => {
+        this.getWarnRecordList();
+        this.$modal.msgSuccess("操作成功")
+      }).catch(() => {})
     },
 
     handlePageChange(page) {
@@ -1475,6 +1470,15 @@ export default {
       if (this.currentRule.conditions.length > 1) {
         this.currentRule.conditions.splice(index, 1);
       }
+    },
+    addAction() {
+      this.currentRule.actions.push({
+        functionCode: '',
+        functionParams: ''
+      })
+    },
+    removeAction(index) {
+      this.currentRule.actions.splice(index, 1)
     },
     getPropertyByDeviceSn(){
       getPropertyBySn(this.device.deviceSn).then(res=>{
@@ -2138,7 +2142,13 @@ export default {
 .gray-select ::v-deep .el-select-dropdown {
   border: 1px solid #e4e7ed;
 }
-
+.tab-tip {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffa600;
+  position: relative;
+  padding-left: 12px;
+}
 .gray-select ::v-deep .el-select-dropdown__item {
   color: #606266;
 }

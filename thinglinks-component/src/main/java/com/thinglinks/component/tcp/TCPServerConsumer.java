@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static com.thinglinks.component.tcp.TCPClientManager.*;
+import static com.thinglinks.component.tcp.TCPClientManager.DEVICE_CLIENT;
 
 /**
  * @Description:
@@ -66,7 +66,7 @@ public class TCPServerConsumer {
                     TCPServerInstance tcpServerInstance = TCPServerManager.getServerInstance(componentId);
                     if(tcpServerInstance!=null){
                         DEVICE_CLIENT.put(decodeMessage.getDeviceSn(),tcpServerInstance.getClientByClientId(clientId));
-                        CLIENT_DEVICE.put(clientId, decodeMessage.getDeviceSn());
+                        TCPClientManager.bindDeviceSn(clientId, decodeMessage.getDeviceSn());
                     }
                 }
                 threadPoolTaskExecutor.execute(() -> {

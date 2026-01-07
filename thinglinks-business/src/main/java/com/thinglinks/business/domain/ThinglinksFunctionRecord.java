@@ -1,13 +1,12 @@
 package com.thinglinks.business.domain;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.thinglinks.common.annotation.Excel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import java.util.Date;
 import lombok.NoArgsConstructor;
-import com.baomidou.mybatisplus.annotation.TableName;
+
+import java.util.Date;
 
 /**
  * 指令下发记录对象 thinglinks_function_record
@@ -48,7 +47,7 @@ private static final long serialVersionUID = 1L;
     /** 设备名称 */
     @Excel(name = "设备名称")
     private String deviceName;
-    /** 0-手动触发 1-告警触发 */
-    @Excel(name = "0-手动触发 1-告警触发")
+    /** 0-手动触发 1-告警触发 2-定时触发*/
+    @Excel(name = "0-手动触发 1-告警触发 2-定时触发")
     private String triggerType;
 }

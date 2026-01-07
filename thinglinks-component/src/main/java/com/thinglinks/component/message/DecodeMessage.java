@@ -39,5 +39,8 @@ public class DecodeMessage {
     private String coapRecoverContent = null;
 
     //======HTTP回复体
+    /**是否需要回复*/
+    private Boolean httNeedReply = false;
+    /**回复内容*/
     private Object httpReply;
 }
