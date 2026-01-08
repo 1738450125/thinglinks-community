@@ -381,24 +381,6 @@
               <el-form-item label="告警消息">
                 <el-input type="textarea" v-model="currentRule.message" placeholder="请输入告警消息"></el-input>
               </el-form-item>
-
-              <el-form-item label="执行动作">
-                <div v-for="(action, index) in currentRule.actions" :key="index" class="action-row">
-                  <el-select v-model="action.functionCode" placeholder="选择动作" style="width: 200px;">
-                    <el-option v-for="act in functionList" :key="act.functionCode" :label="act.functionName"
-                               :value="act.functionCode"></el-option>
-                  </el-select>
-                  <el-input v-model="action.functionParams" placeholder="输入参数" class="action-params"
-                            style="width: 300px;"></el-input>
-                  <el-button v-if="currentRule.actions.length > 1" type="danger" icon="el-icon-delete" circle
-                             style="margin-left: 10px;" @click="removeAction(index)"></el-button>
-                </div>
-
-                <!-- 添加执行动作按钮 -->
-                <div style="margin-top: 10px;">
-                  <el-button type="primary" icon="el-icon-plus" @click="addAction">添加执行动作</el-button>
-                </div>
-              </el-form-item>
             </el-form>
 
             <div slot="footer" class="dialog-footer">
@@ -1243,12 +1225,6 @@ export default {
       if (this.currentRule.conditions.length > 1) {
         this.currentRule.conditions.splice(index, 1);
       }
-    },
-    addAction() {
-      this.currentRule.actions.push({
-        functionCode: '',
-        functionParams: ''
-      })
     },
     removeAction(index) {
       this.currentRule.actions.splice(index, 1)

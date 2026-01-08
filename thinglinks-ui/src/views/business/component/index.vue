@@ -33,7 +33,6 @@
 
     <!-- 卡片展示区域保持不变 -->
     <div class="component-card-container">
-      <!-- 使用CSS Grid替代Element UI栅格系统 -->
       <div class="card-grid">
         <el-card
           v-for="(item, index) in componentList"
@@ -42,7 +41,6 @@
           shadow="hover"
           :class="item.status == 1 ? 'active-status' : 'inactive-status'"
         >
-          <!-- 梯形状态标识 -->
           <div class="status-trapezoid" :class="item.status == 1 ? 'active' : 'inactive'">
             {{ item.status == 1 ? '启用' : '停用' }}
           </div>
@@ -62,21 +60,8 @@
               <i>端口：</i>
               <span class="value">{{ item.port || '未知' }}</span>
             </div>
-<!--            <div class="card-item">-->
-<!--              <i class="el-icon-link"></i>-->
-<!--              <span class="value">{{ item.ipAddr }}:{{ item.port }}</span>-->
-<!--            </div>-->
-<!--            <div class="card-item">-->
-<!--              <i class="el-icon-lock"></i>-->
-<!--              <span class="value">{{ item.openTls == 1 ? 'TLS开启' : 'TLS关闭' }}</span>-->
-<!--            </div>-->
-<!--            <div class="card-item">-->
-<!--              <i class="el-icon-document"></i>-->
-<!--              <span class="value">{{ item.protocolName || '未知协议' }}</span>-->
-<!--            </div>-->
           </div>
           <div class="card-actions">
-            <!-- 状态切换按钮 -->
             <el-button
               size="mini"
               class="action-btn status-btn"
@@ -133,17 +118,18 @@
       class="component-drawer"
     >
       <div class="drawer-content">
-        <el-form ref="form" :model="form" :rules="rules" label-width="120px">
-          <el-form-item label="组件名称" prop="name" required>
+        <!-- 核心：model是form，校验规则对应form下的字段 -->
+        <el-form ref="form" :model="form" :rules="dynamicRules" label-width="120px">
+          <el-form-item label="组件名称" prop="name">
             <el-input v-model="form.name" placeholder="请输入组件名称"/>
           </el-form-item>
-          <el-form-item label="网络类型" prop="netType" required>
+          <el-form-item label="网络类型" prop="netType">
             <el-select v-model="form.netType" placeholder="请选择" @change="handleNetTypeChange">
               <el-option label="MQTT_CLIENT" value="MQTT_CLIENT"></el-option>
               <el-option label="TCP_SERVER" value="TCP_SERVER"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="状态" prop="status" required>
+          <el-form-item label="状态" prop="status">
             <el-select v-model="form.status" placeholder="请选择">
               <el-option label="启用" value="1"></el-option>
               <el-option label="停用" value="0"></el-option>
@@ -164,36 +150,37 @@
           <div class="dynamic-config-section">
             <div class="section-title">其余配置</div>
             <div class="dynamic-config-fields">
-              <!-- MQTT 客户端配置 -->
+              <!-- MQTT 客户端配置：prop指向form.dynamicConfig.xxx -->
               <template v-if="form.netType === 'MQTT_CLIENT'">
-                <el-form-item label="服务器地址" prop="brokerUrl" required>
-                  <el-input v-model="dynamicConfig.brokerUrl" placeholder="如 tcp://127.0.0.1:1883"/>
+                <el-form-item label="服务器地址" prop="dynamicConfig.brokerUrl">
+                  <el-input v-model="form.dynamicConfig.brokerUrl" placeholder="如 tcp://127.0.0.1:1883"/>
                 </el-form-item>
-                <el-form-item label="用户名" prop="username">
-                  <el-input v-model="dynamicConfig.username" placeholder="请输入用户名"/>
+                <el-form-item label="用户名" prop="dynamicConfig.username">
+                  <el-input v-model="form.dynamicConfig.username" placeholder="请输入用户名"/>
                 </el-form-item>
-                <el-form-item label="密码" prop="password">
-                  <el-input v-model="dynamicConfig.password" type="password" placeholder="请输入密码" show-password/>
+                <el-form-item label="密码" prop="dynamicConfig.password">
+                  <el-input v-model="form.dynamicConfig.password" type="password" placeholder="请输入密码" show-password/>
                 </el-form-item>
-                <el-form-item label="订阅主题" required>
-                  <el-input v-model="dynamicConfig.topicStr" placeholder="用英文逗号分割,如：#,/#,/topic1/#,topic2"/>
+                <el-form-item label="订阅主题" prop="dynamicConfig.topicStr">
+                  <el-input v-model="form.dynamicConfig.topicStr" placeholder="用英文逗号分割,如：#,/#,/topic1/#,topic2"/>
                 </el-form-item>
-                <el-form-item label="Keep Alive(秒)">
-                  <el-input-number v-model="dynamicConfig.keepAliveInterval" :min="0" :max="65535"/>
+                <el-form-item label="Keep Alive(秒)" prop="dynamicConfig.keepAliveInterval">
+                  <el-input-number v-model="form.dynamicConfig.keepAliveInterval" :min="0" :max="65535"/>
                 </el-form-item>
               </template>
 
-              <!-- TCP/UDP 服务器配置 -->
-              <template v-else-if="form.netType === 'TCP_SERVER' || form.netType === 'UDP_SERVER'">
-                <el-form-item label="端口" prop="serverPort">
-                  <el-input v-model="dynamicConfig.serverPort" placeholder="端口"/>
+              <!-- TCP 服务器配置：prop指向form.dynamicConfig.serverPort -->
+              <template v-else-if="form.netType === 'TCP_SERVER'">
+                <el-form-item label="端口" prop="dynamicConfig.serverPort">
+                  <el-input v-model="form.dynamicConfig.serverPort" placeholder="端口"/>
                 </el-form-item>
               </template>
-              <!-- 默认配置（当没有匹配的类型时） -->
+
+              <!-- 默认配置 -->
               <template v-else>
-                <el-form-item label="自定义配置">
+                <el-form-item label="自定义配置" prop="dynamicConfig.custom">
                   <el-input
-                    v-model="dynamicConfig.custom"
+                    v-model="form.dynamicConfig.custom"
                     type="textarea"
                     :rows="3"
                     placeholder="请输入自定义配置（建议JSON格式）"
@@ -214,7 +201,7 @@
       </div>
     </el-drawer>
 
-    <!-- 组件详情弹窗保持不变 -->
+    <!-- 组件详情弹窗 -->
     <component-detail
       :visible="dialogVisible"
       :component="selectedComponent"
@@ -224,36 +211,39 @@
 </template>
 
 <script>
-import {listComponent, getComponent, delComponent, addComponent, updateComponent,control} from "@/api/business/component"
-import {listProtocol} from "@/api/business/protocol";
+import { listComponent, getComponent, delComponent, addComponent, updateComponent, control } from "@/api/business/component"
+import { listProtocol } from "@/api/business/protocol";
 import ComponentDetail from "@/views/business/component/detail";
 
 export default {
   name: "ComponentView",
-  components: {ComponentDetail},
+  components: { ComponentDetail },
   data() {
+    // 端口校验方法
+    const validatePort = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('端口不能为空'))
+        return
+      }
+      const port = parseInt(value)
+      if (isNaN(port) || port < 1 || port > 65535) {
+        callback(new Error('端口范围必须在1-65535之间'))
+      } else {
+        callback()
+      }
+    }
+
     return {
-      // 遮罩层
       loading: true,
-      // 选中数组
       ids: [],
-      // 选中的卡片
       selectedCards: [],
-      // 非单个禁用
       single: true,
-      // 非多个禁用
       multiple: true,
-      // 显示搜索条件
       showSearch: true,
-      // 总条数
       total: 0,
-      // 网络组件表格数据
       componentList: [],
-      // 弹出层标题
       title: "",
-      // 是否显示弹出层
       open: false,
-      // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 12,
@@ -267,20 +257,55 @@ export default {
         protocolId: null,
         protocolName: null
       },
-      // 表单参数
+      // 核心修改：dynamicConfig作为form的子对象
       form: {
+        dynamicConfig: {} // 初始化动态配置对象
       },
       config: {},
-      // 验证规则
-      rules: {
-      },
+      validatePort,
       protocolList: [],
-      selectProtocolId:null,
+      selectProtocolId: null,
       dialogVisible: false,
-      selectedComponent: null, // 可以动态设置组件ID
-      // 新增：动态配置对象
-      dynamicConfig: {},
+      selectedComponent: null,
+    }
+  },
+  // 核心优化：动态校验规则的prop对应form.dynamicConfig.xxx
+  computed: {
+    dynamicRules() {
+      // 基础校验规则（所有类型通用）
+      const baseRules = {
+        name: [{ required: true, message: '组件名称不能为空', trigger: 'blur' }],
+        netType: [{ required: true, message: '网络类型不能为空', trigger: 'change' }],
+        status: [{ required: true, message: '状态不能为空', trigger: 'change' }],
+      }
 
+      // 根据选中的网络类型添加专属校验规则
+      switch (this.form.netType) {
+        case 'MQTT_CLIENT':
+          return {
+            ...baseRules,
+            'dynamicConfig.brokerUrl': [{ required: true, message: '服务器地址不能为空', trigger: 'blur' }],
+            'dynamicConfig.topicStr': [{ required: true, message: '订阅主题不能为空', trigger: 'blur' }],
+            'dynamicConfig.keepAliveInterval': [{
+              required: true,
+              message: 'Keep Alive不能为空',
+              trigger: 'blur',
+              type: 'number'
+            }],
+          }
+        case 'TCP_SERVER':
+          return {
+            ...baseRules,
+            'dynamicConfig.serverPort': [{
+              required: true,
+              message: '端口不能为空',
+              trigger: 'blur',
+              validator: this.validatePort
+            }],
+          }
+        default:
+          return baseRules
+      }
     }
   },
   created() {
@@ -308,7 +333,7 @@ export default {
       this.open = false
       this.reset()
     },
-    // 表单重置
+    // 表单重置（核心：重置form下的dynamicConfig）
     reset() {
       this.form = {
         id: null,
@@ -325,19 +350,27 @@ export default {
         status: null,
         otherConfig: null,
         protocolId: null,
-        protocolName: null
+        protocolName: null,
+        dynamicConfig: {} // 重置动态配置
       }
-      // 重置动态配置
-      this.dynamicConfig = {}
+      this.selectProtocolId = null
+      // 清除表单校验状态
+      if (this.$refs.form) {
+        this.$refs.form.clearValidate()
+      }
     },
-    /** 网络类型变化处理 */
+    /** 网络类型变化处理（操作form.dynamicConfig） */
     handleNetTypeChange(netType) {
       // 重置动态配置
-      this.dynamicConfig = {}
+      this.form.dynamicConfig = {}
+      // 清除表单校验状态
+      if (this.$refs.form) {
+        this.$refs.form.clearValidate()
+      }
 
       // 根据网络类型设置默认值
       if (netType === 'MQTT_CLIENT') {
-        this.dynamicConfig = {
+        this.form.dynamicConfig = {
           brokerUrl: '',
           username: '',
           password: '',
@@ -345,44 +378,10 @@ export default {
           cleanSession: true,
           keepAliveInterval: 60
         }
-      }else if (netType === 'TCP_SERVER') {
-        this.dynamicConfig = {
+      } else if (netType === 'TCP_SERVER') {
+        this.form.dynamicConfig = {
           serverPort: ''
         }
-      }
-    },
-    /** 匿名开关变化处理 */
-    handleAnonymousChange(value) {
-      if (value === true) {
-        // 允许匿名时清空用户名密码
-        this.dynamicConfig.username = ''
-        this.dynamicConfig.password = ''
-      }
-    },
-
-    /** 匿名开关变化处理 */
-    handleIsAuthChange(value) {
-      if (value === true) {
-        // 允许匿名时清空用户名密码
-        this.dynamicConfig.tokenConfig = ''
-      }
-    },
-    /** 端口验证 */
-    validatePort(rule, value, callback) {
-      if (!value) {
-        if (rule.required) {
-          callback(new Error('端口不能为空'))
-        } else {
-          callback()
-        }
-        return
-      }
-
-      const port = parseInt(value)
-      if (isNaN(port) || port < 1 || port > 65535) {
-        callback(new Error('端口范围必须在1-65535之间'))
-      } else {
-        callback()
       }
     },
     /** 搜索按钮操作 */
@@ -395,12 +394,6 @@ export default {
       this.resetForm("queryForm")
       this.handleQuery()
     },
-    // 卡片选择变化
-    handleCardSelectionChange(selection) {
-      this.ids = selection
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
-    },
     /** 新增按钮操作 */
     handleAdd() {
       this.reset()
@@ -409,21 +402,24 @@ export default {
       this.form.openTls = '0'
       this.title = "添加网络组件"
     },
-    /** 修改按钮操作 */
+    /** 修改按钮操作（解析数据到form.dynamicConfig） */
     handleUpdate(row) {
       this.reset()
       const id = row.id || this.ids[0]
       getComponent(id).then(response => {
-        this.form = response.data
-        if(this.form.protocolId){
-          this.selectProtocolId = this.form?.protocolId
+        this.form = {
+          ...response.data,
+          dynamicConfig: {} // 初始化动态配置
         }
-        // 解析 otherConfig 到 dynamicConfig
+        if (this.form.protocolId) {
+          this.selectProtocolId = this.form.protocolId
+        }
+        // 解析 otherConfig 到 form.dynamicConfig
         if (this.form.otherConfig) {
           try {
-            this.dynamicConfig = JSON.parse(this.form.otherConfig)
+            this.form.dynamicConfig = JSON.parse(this.form.otherConfig)
           } catch (e) {
-            this.dynamicConfig = {}
+            this.form.dynamicConfig = {}
           }
         }
 
@@ -435,22 +431,12 @@ export default {
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          // MQTT Broker 特殊验证
-          if (this.form.netType === 'MQTT_BROKER') {
-            // 如果不允许匿名，必须填写用户名密码
-            if (this.dynamicConfig.allowAnonymous === false) {
-              if (!this.dynamicConfig.username || !this.dynamicConfig.password) {
-                this.$modal.msgError('不允许匿名时，用户名和密码为必填项')
-                return
-              }
-            }
-          }
-          // 将动态配置转换为 JSON 字符串
-          this.form.otherConfig = JSON.stringify(this.dynamicConfig)
-          if(this.selectProtocolId){
+          // 将form.dynamicConfig转换为JSON字符串赋值给otherConfig
+          this.form.otherConfig = JSON.stringify(this.form.dynamicConfig)
+          if (this.selectProtocolId) {
             this.form.protocolId = this.selectProtocolId
             let protocol = this.protocolList.find(item => item.id === this.form.protocolId)
-            this.form.protocolName = protocol.protocolName
+            this.form.protocolName = protocol?.protocolName || ''
           }
           if (this.form.id != null) {
             updateComponent(this.form).then(response => {
@@ -480,9 +466,9 @@ export default {
       }).catch(() => {
       })
     },
-    toggleStatus(item){
-      control({id:item.id,status:item.status==1?0:1}).then(res=>{
-        if(res?.code==200){
+    toggleStatus(item) {
+      control({ id: item.id, status: item.status == 1 ? 0 : 1 }).then(res => {
+        if (res?.code == 200) {
           this.$message.success("操作成功")
           this.getList()
         }
@@ -500,11 +486,9 @@ export default {
       }
     },
     showComponentDetail(component) {
-      // 这里可以设置具体的组件ID
-      this.selectedComponent = component // 或者从数据中获取
+      this.selectedComponent = component
       this.dialogVisible = true
     },
-
     handleDialogClose() {
       this.dialogVisible = false
       this.selectedComponentId = ''
