@@ -40,7 +40,7 @@ public class DecodeMessage {
 
     //======HTTP回复体
     /**是否需要回复*/
-    private Boolean httNeedReply = false;
+    private Boolean httpNeedReply = false;
     /**回复内容*/
     private Object httpReply;
 }
