@@ -46,9 +46,9 @@ public class MqttClientManager {
             }else {
                 mqttClient.subscribe("#",0);
             }
-            mqttClient.setAutomaticReconnect(true);
             if(mqttClient.isConnected()){
                 clientMap.put(config.getClientId(),mqttClient);
+                mqttClient.setAutomaticReconnect(true);
             }
             return mqttClient.isConnected();
         }catch (Exception e){
