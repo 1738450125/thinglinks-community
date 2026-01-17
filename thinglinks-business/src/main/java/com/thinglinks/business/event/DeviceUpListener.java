@@ -154,6 +154,9 @@ public class DeviceUpListener {
                     //用全属性缓存来计算
                     DecodeMessage lastData = MessageCache.getDeviceLastData(decodeMessage.getDeviceSn());
                     List<PropertyNode> propertyNodes = PropertyToJson.PROPERTY_TREE.get(decodeMessage.getDeviceSn());
+                    if(propertyNodes==null){
+                        return;
+                    }
                     String propertyJson = PropertyToJson.convertToJson(propertyNodes,lastData.getProperties());
                     List<WarnRule> rules = CacheUtils.getDeviceWarnRule(decodeMessage.getDeviceSn());
                     rules.forEach(rule->{
