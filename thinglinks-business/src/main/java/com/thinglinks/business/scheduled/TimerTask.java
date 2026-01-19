@@ -66,7 +66,12 @@ public class TimerTask {
                 }
                 try {
                     thinglinksComponentService.openComponent(component.getId());
-                } catch (IOException | CommonWarnException e) {
+                } catch (Exception e) {
+                    //开启失败则状态置为关闭
+                    ThinglinksComponent closeComponent = new ThinglinksComponent();
+                    closeComponent.setId(component.getId());
+                    closeComponent.setStatus("0");
+                    thinglinksComponentService.updateById(closeComponent);
                     throw new RuntimeException(e);
                 }
             });
