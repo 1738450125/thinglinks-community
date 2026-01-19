@@ -25,7 +25,7 @@
 ## 技术文档
 ### [官方技术文档](http://47.109.145.72:18000/)
 ## 协议包代码地址
-### [协议包代码地址](https://gitee.com/chinachentao/quickly_creaete)
+### [协议包代码地址](https://gitee.com/chinachentao/protocol-code)
 
 ## 测试方式
 
