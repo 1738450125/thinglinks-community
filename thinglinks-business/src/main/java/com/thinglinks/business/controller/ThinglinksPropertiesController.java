@@ -5,12 +5,15 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.thinglinks.business.domain.ThinglinksDevice;
 import com.thinglinks.business.domain.ThinglinksDeviceLogs;
 import com.thinglinks.business.domain.ThinglinksProperties;
 import com.thinglinks.business.domain.dto.PropertyListDTO;
 import com.thinglinks.business.service.IThinglinksDeviceLogsService;
+import com.thinglinks.business.service.IThinglinksDeviceService;
 import com.thinglinks.business.service.IThinglinksProductService;
 import com.thinglinks.business.service.IThinglinksPropertiesService;
+import com.thinglinks.business.utils.PropertyConverter;
 import com.thinglinks.common.core.controller.BaseController;
 import com.thinglinks.common.core.domain.AjaxResult;
 import com.thinglinks.common.core.page.TableDataInfo;
@@ -19,6 +22,8 @@ import com.thinglinks.common.utils.StringUtils;
 import com.thinglinks.common.utils.poi.ExcelUtil;
 import com.thinglinks.component.message.DecodeMessage;
 import com.thinglinks.component.message.MessageCache;
+import com.thinglinks.component.message.PropertyNode;
+import com.thinglinks.component.utils.PropertyToJson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -43,8 +48,9 @@ public class ThinglinksPropertiesController extends BaseController
     private IThinglinksProductService productService;
     @Autowired
     private IThinglinksDeviceLogsService thinglinksDeviceLogsService;
-
-    public static final List<String> KEYWORD = Arrays.asList("currentStatus","changeStatus","deviceProperty");
+    @Autowired
+    private IThinglinksDeviceService thinglinksDeviceService;
+    public static final List<String> KEYWORD = Arrays.asList("currentStatus","changeStatus","deviceProperty","device_online","device_offline");
     /**
      * 查询物模型属性定义列表
      */
@@ -125,8 +131,16 @@ public class ThinglinksPropertiesController extends BaseController
                 property.setBelongSn(propertyListDTO.getBelongSn());
                 property.setBelongType(propertyListDTO.getBelongType());
                 property.setFromType(propertyListDTO.getFromType());
+                property.setParentId("0");
+                property.setSortNum(0L);
             });
             thinglinksPropertiesService.saveBatch(list);
+            ThinglinksDevice device = thinglinksDeviceService.getOne(new LambdaQueryWrapper<ThinglinksDevice>()
+                    .eq(ThinglinksDevice::getDeviceSn,propertyListDTO.getBelongSn()),false);
+            if(device!=null){
+                List<PropertyNode> nodeList = PropertyConverter.buildPropertyTree(list);
+                PropertyToJson.PROPERTY_TREE.put(propertyListDTO.getBelongSn(),nodeList);
+            }
             return AjaxResult.success("更新属性成功");
         }else {
             return AjaxResult.error("请至少添加一条属性");
