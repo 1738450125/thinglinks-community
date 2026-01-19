@@ -117,7 +117,7 @@
 
 ### 6、协议开发
 
-#### 协议包在代码同级目录 protocol.zip
+#### 协议包在 [协议包代码地址](https://gitee.com/chinachentao/protocol-code)
 
 ##### 开发协议只需要实现对应网络协议的decode和encode方法即可
 
