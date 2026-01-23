@@ -1,10 +1,10 @@
 package com.thinglinks.business.domain;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.thinglinks.common.annotation.Excel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.util.Date;
 
@@ -20,7 +20,7 @@ import java.util.Date;
 @TableName(value = "thinglinks_warn_config")
 public class ThinglinksWarnConfig
 {
-private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
     /** id */
     private String id;
@@ -53,4 +53,6 @@ private static final long serialVersionUID = 1L;
     private String executeAction;
     /** 是否启用 0-否 1-是*/
     private String isEnable;
+    /** 告警类型 0-属性告警 1-在线告警 2-离线告警 */
+    private String warnType;
 }

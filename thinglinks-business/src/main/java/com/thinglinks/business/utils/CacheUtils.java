@@ -1,20 +1,23 @@
 package com.thinglinks.business.utils;
 
-import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.thinglinks.business.domain.ThinglinksDevice;
-import com.thinglinks.business.domain.ThinglinksWarnConfig;
+import com.thinglinks.business.domain.*;
 import com.thinglinks.business.service.IThinglinksDeviceService;
+import com.thinglinks.business.service.IThinglinksFunctionService;
 import com.thinglinks.business.service.IThinglinksWarnConfigService;
 import com.thinglinks.business.warn.WarnRule;
+import com.thinglinks.common.utils.StringUtils;
 import com.thinglinks.common.utils.spring.SpringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -26,27 +29,50 @@ public class CacheUtils {
     /**
      * 设备实例数据缓存
      */
-    public final static Map<String, ThinglinksDevice> DEVICE_MAP = new HashMap<>();
+    /**
+     * 设备实例数据缓存
+     */
+    public final static ConcurrentMap<String, ThinglinksDevice> DEVICE_MAP = new ConcurrentHashMap<>();
+
+    /**
+     * 产品数据缓存
+     */
+    public final static ConcurrentMap<String, ThinglinksProduct> PRODUCT_MAP = new ConcurrentHashMap<>();
 
     /**
      * 设备在离线状态缓存
      */
-    public final static Map<String,Boolean> DEVICE_STATUS = new HashMap<>();
+    public final static ConcurrentMap<String,Boolean> DEVICE_STATUS = new ConcurrentHashMap<>();
 
     /**
      * 设备某个规则上一次告警时间
      */
-    public final static Map<String,Long> DEVICE_WARN_TIME = new HashMap<>();
+    public final static ConcurrentMap<String,Long> DEVICE_WARN_TIME = new ConcurrentHashMap<>();
 
     /**
      * 设备告警规则
      */
-    public final static Map<String,List<WarnRule>> DEVICE_WARN_RULE = new HashMap<>();
+    public final static ConcurrentMap<String,List<WarnRule>> DEVICE_WARN_RULE = new ConcurrentHashMap<>();
 
     /**
      * 设备联动告警规则
      */
-    public final static Map<String,List<WarnRule>> DEVICE_LINK_WARN_RULE = new HashMap<>();
+    public final static ConcurrentMap<String,List<WarnRule>> DEVICE_LINK_WARN_RULE = new ConcurrentHashMap<>();
+
+    /**
+     * 设备自注册开关
+     */
+    public static String DEVICE_REGISTER_SWITCH = "false";
+
+    /**
+     * 设备指令缓存
+     */
+    public static ConcurrentMap<String,List<ThinglinksFunction>> DEVICE_FUNCTION = new ConcurrentHashMap<>();
+
+    /**
+     * 网络组件缓存
+     */
+    public static ConcurrentMap<String, ThinglinksComponent> COMPONENT_MAP = new ConcurrentHashMap<>();
 
     /**
      * 更新所有设备实例数据
@@ -209,6 +235,28 @@ public class CacheUtils {
             configList.forEach(config->{
                 WarnRule rule =  JSONObject.parseObject(config.getRuleJson(),WarnRule.class);
                 rule.setId(config.getId());
+                rule.setWarnType("0");
+                if(rule.getConditions()!=null&&rule.getConditions().size()>0){
+                    rule.getConditions().forEach(condition->{
+                        if("device_online".equals(condition.getType())){
+                            condition.setAttribute("device_online");
+                            condition.setOperator("eq");
+                            condition.setValue("1");
+                            rule.setWarnType("1");
+                        }
+                        if("device_offline".equals(condition.getType())){
+                            condition.setAttribute("device_offline");
+                            condition.setOperator("eq");
+                            condition.setValue("1");
+                            rule.setWarnType("2");
+                        }
+                    });
+                    if(!"0".equals(rule.getWarnType())){
+                        SpringUtils.getBean(IThinglinksWarnConfigService.class).update(new LambdaUpdateWrapper<ThinglinksWarnConfig>()
+                                .eq(ThinglinksWarnConfig::getId,config.getId())
+                                .set(ThinglinksWarnConfig::getWarnType,rule.getWarnType()));
+                    }
+                }
                 list.add(rule);
             });
             DEVICE_WARN_RULE.put(deviceSn, list);
@@ -225,6 +273,28 @@ public class CacheUtils {
         configList.forEach(config->{
             WarnRule rule =  JSONObject.parseObject(config.getRuleJson(),WarnRule.class);
             rule.setId(config.getId());
+            rule.setWarnType("0");
+            if(rule.getConditions()!=null&&rule.getConditions().size()>0){
+                rule.getConditions().forEach(condition->{
+                    if("device_online".equals(condition.getType())){
+                        condition.setAttribute("device_online");
+                        condition.setOperator("eq");
+                        condition.setValue("1");
+                        rule.setWarnType("1");
+                    }
+                    if("device_offline".equals(condition.getType())){
+                        condition.setAttribute("device_offline");
+                        condition.setOperator("eq");
+                        condition.setValue("1");
+                        rule.setWarnType("2");
+                    }
+                });
+                if(!"0".equals(rule.getWarnType())){
+                    SpringUtils.getBean(IThinglinksWarnConfigService.class).update(new LambdaUpdateWrapper<ThinglinksWarnConfig>()
+                            .eq(ThinglinksWarnConfig::getId,config.getId())
+                            .set(ThinglinksWarnConfig::getWarnType,rule.getWarnType()));
+                }
+            }
             list.add(rule);
         });
         DEVICE_WARN_RULE.put(deviceSn,list);
@@ -249,6 +319,68 @@ public class CacheUtils {
      */
     public static List<WarnRule> getDeviceWarnRule(String deviceSn){
         return DEVICE_WARN_RULE.getOrDefault(deviceSn,new ArrayList<>());
+    }
+
+    /**
+     * 更新设备指令缓存
+     */
+    public static void updateDeviceFunctionCache(String deviceSn){
+        List<ThinglinksFunction> list = SpringUtils.getBean(IThinglinksFunctionService.class).list(new LambdaQueryWrapper<ThinglinksFunction>()
+                .eq(ThinglinksFunction::getBelongSn,deviceSn));
+        if(list.isEmpty()){
+            return;
+        }
+        DEVICE_FUNCTION.put(deviceSn,list);
+    }
+
+    /**
+     * 设置设备指令缓存
+     */
+    public static void setDeviceFunctionCache(String deviceSn,List<ThinglinksFunction> list){
+        if(StringUtils.isEmpty(deviceSn)||list.isEmpty()){
+            return;
+        }
+        DEVICE_FUNCTION.put(deviceSn,list);
+    }
+
+    /**
+     * 获取设备指令缓存
+     */
+    public static ThinglinksFunction getDeviceFunctionCache(String deviceSn,String functionCode){
+        if(StringUtils.isEmpty(functionCode)||StringUtils.isEmpty(deviceSn)){
+            return null;
+        }
+        List<ThinglinksFunction> functions = DEVICE_FUNCTION.getOrDefault(deviceSn,null);
+        if(functions==null||functions.isEmpty()){
+            return null;
+        }
+        for (int i = 0; i < functions.size(); i++) {
+            if(functionCode.equals(functions.get(i).getFunctionCode())){
+                return functions.get(i);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 更新网络组件缓存
+     */
+    public static void setComponentCache(String componentId,ThinglinksComponent thinglinksComponent){
+        COMPONENT_MAP.put(componentId,thinglinksComponent);
+    }
+
+    /**
+     * 获取网络组件缓存
+     */
+    public static ThinglinksComponent getComponentCache(String componentId){
+        return COMPONENT_MAP.getOrDefault(componentId,null);
+    }
+
+    /**
+     * 删除网络组件缓存
+     */
+    public static void removeComponentCache(String componentId){
+        COMPONENT_MAP.remove(componentId);
     }
 
 }

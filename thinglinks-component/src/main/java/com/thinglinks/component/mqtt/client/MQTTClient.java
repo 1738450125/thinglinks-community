@@ -10,8 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
-import static com.thinglinks.component.mqtt.client.MqttClientManager.CLIENT_DEVICE;
-import static com.thinglinks.component.mqtt.client.MqttClientManager.configMap;
+import static com.thinglinks.component.mqtt.client.MqttClientManager.*;
 
 /**
  * @Description: MQTT客户端工具类

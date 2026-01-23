@@ -17,6 +17,23 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="设备状态">
+        <el-select v-model="queryParams.status" placeholder="请选择设备状态">
+          <el-option label="全部" value=""></el-option>
+          <el-option label="在线" value="1"></el-option>
+          <el-option label="离线" value="0"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="归属产品" prop="groupCode">
+        <el-select v-model="queryParams.productSn" placeholder="请选择产品">
+          <el-option
+            v-for="item in productList"
+            :key="item.productSn"
+            :label="item.productName"
+            :value="item.productSn">
+          </el-option>
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -178,7 +195,7 @@
             <el-input v-model="form.deviceSn" placeholder="请输入设备编码" :disabled="form.id"/>
           </el-form-item>
           <el-form-item label="关联产品" prop="productId" required>
-            <el-select v-model="form.productId" placeholder="请选择" :disabled="form.id" @change="handleProductChange" >
+            <el-select v-model="form.productId" placeholder="请选择产品" :disabled="form.id" @change="handleProductChange" >
               <el-option
                 v-for="item in productList"
                 :key="item.id"
@@ -284,8 +301,14 @@ export default {
   },
   created() {
     this.getList()
+    this.getProductList()
   },
   methods: {
+    getProductList(){
+      listProduct({pageNum: 1, pageSize: 10000}).then(res => {
+        this.productList = res.rows
+      })
+    },
     /** 查询设备列表 */
     getList() {
       this.loading = true
@@ -334,7 +357,8 @@ export default {
         linkMethodName: null,
         protocolId: null,
         protocolName: null,
-        status: null
+        status: null,
+        timeoutSeconds: null,
       }
       this.selectedDeviceType = null
       this.resetForm("form")
@@ -346,6 +370,7 @@ export default {
     },
     /** 重置按钮操作 */
     resetQuery() {
+      this.queryParams = {}
       this.resetForm("queryForm")
       this.handleQuery()
     },
@@ -360,23 +385,18 @@ export default {
       this.reset()
       this.isEdit = false;
       this.open = true
-      listProduct({pageNum: 1, pageSize: 10000}).then(res => {
-        this.productList = res.rows
-      })
       this.title = "添加设备"
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset()
       this.isEdit = true;
-      listProduct({pageNum: 1, pageSize: 10000}).then(res => {
-        this.productList = res.rows
-      })
       const id = row.id || this.ids[0]
       getDevice(id).then(response => {
         this.form = response.data
         this.open = true
         this.title = "修改设备"
+        this.selectedDeviceType = this.form.deviceType;
         this.handleProductChange(this.form.productId)
       })
     },

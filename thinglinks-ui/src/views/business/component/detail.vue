@@ -7,9 +7,9 @@
           <h3>{{ componentName }}</h3>
           <div class="component-basic-info">
             <span class="component-id">ID: {{ componentId }}</span>
-<!--            <span class="component-status" :class="componentStatus">-->
-<!--              {{ componentStatusText }}-->
-<!--            </span>-->
+            <!--            <span class="component-status" :class="componentStatus">-->
+            <!--              {{ componentStatusText }}-->
+            <!--            </span>-->
           </div>
         </div>
         <button class="close-btn" @click="handleClose">×</button>
@@ -60,24 +60,24 @@
             </div>
           </div>
 
-<!--          &lt;!&ndash; 消息发送区域 &ndash;&gt;-->
-<!--          <div class="message-send-section" v-if="isConnected">-->
-<!--            <div class="input-group">-->
-<!--              <textarea-->
-<!--                v-model="messageToSend"-->
-<!--                placeholder="输入要发送的消息..."-->
-<!--                class="message-input"-->
-<!--                rows="2"-->
-<!--              ></textarea>-->
-<!--            </div>-->
-<!--            <button-->
-<!--              @click="sendMessage"-->
-<!--              :disabled="!messageToSend.trim()"-->
-<!--              class="btn btn-send"-->
-<!--            >-->
-<!--              发送消息-->
-<!--            </button>-->
-<!--          </div>-->
+          <!--          &lt;!&ndash; 消息发送区域 &ndash;&gt;-->
+          <!--          <div class="message-send-section" v-if="isConnected">-->
+          <!--            <div class="input-group">-->
+          <!--              <textarea-->
+          <!--                v-model="messageToSend"-->
+          <!--                placeholder="输入要发送的消息..."-->
+          <!--                class="message-input"-->
+          <!--                rows="2"-->
+          <!--              ></textarea>-->
+          <!--            </div>-->
+          <!--            <button-->
+          <!--              @click="sendMessage"-->
+          <!--              :disabled="!messageToSend.trim()"-->
+          <!--              class="btn btn-send"-->
+          <!--            >-->
+          <!--              发送消息-->
+          <!--            </button>-->
+          <!--          </div>-->
 
           <!-- 消息显示区域 -->
           <div class="messages-section">

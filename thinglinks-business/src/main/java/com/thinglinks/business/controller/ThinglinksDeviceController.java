@@ -1,34 +1,35 @@
 package com.thinglinks.business.controller;
 
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import javax.servlet.http.HttpServletResponse;
+
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.thinglinks.business.domain.ThinglinksDevice;
-import com.thinglinks.business.domain.ThinglinksProduct;
+import com.thinglinks.business.domain.*;
 import com.thinglinks.business.event.DeviceHeartbeatManager;
-import com.thinglinks.business.service.IThinglinksDeviceService;
+import com.thinglinks.business.service.IThinglinksFunctionService;
 import com.thinglinks.business.service.IThinglinksProductService;
 import com.thinglinks.business.service.IThinglinksWarnConfigService;
 import com.thinglinks.business.utils.CacheUtils;
-import com.thinglinks.common.core.controller.BaseController;
-import com.thinglinks.common.core.domain.AjaxResult;
-import com.thinglinks.common.core.page.TableDataInfo;
 import com.thinglinks.common.utils.PageUtils;
 import com.thinglinks.common.utils.SecurityUtils;
 import com.thinglinks.common.utils.StringUtils;
-import com.thinglinks.common.utils.poi.ExcelUtil;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletResponse;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import com.thinglinks.common.core.controller.BaseController;
+import com.thinglinks.common.core.domain.AjaxResult;
+import com.thinglinks.business.service.IThinglinksDeviceService;
+import com.thinglinks.common.utils.poi.ExcelUtil;
+import com.thinglinks.common.core.page.TableDataInfo;
 
 /**
  * 设备Controller
- * 
+ *
  * @author thinglinks
  * @date 2025-09-18
  */
@@ -42,6 +43,8 @@ public class ThinglinksDeviceController extends BaseController
     private IThinglinksProductService thinglinksProductService;
     @Autowired
     private IThinglinksWarnConfigService thinglinksWarnConfigService;
+    @Autowired
+    private IThinglinksFunctionService thinglinksFunctionService;
     /**
      * 查询设备列表
      */
@@ -80,37 +83,26 @@ public class ThinglinksDeviceController extends BaseController
     }
 
     /**
+     * 获取设备详细信息
+     */
+    @GetMapping("/getDeviceBySn")
+    public AjaxResult getDeviceBySn(@RequestParam String deviceSn)
+    {
+        ThinglinksDevice device = thinglinksDeviceService.getOne(new LambdaQueryWrapper<ThinglinksDevice>()
+                .eq(ThinglinksDevice::getDeviceSn,deviceSn),false);
+        if(device==null){
+            return AjaxResult.error("设备不存在，请检查是否已被删除！");
+        }
+        return success(device);
+    }
+
+    /**
      * 新增设备
      */
     @PostMapping
     public AjaxResult add(@RequestBody ThinglinksDevice thinglinksDevice)
     {
-        if(StringUtils.isEmpty(thinglinksDevice.getProductId())){
-            return AjaxResult.error("请选择产品");
-        }
-        //不可与产品sn重复
-        long count = thinglinksProductService.count(new LambdaQueryWrapper<ThinglinksProduct>()
-                .eq(ThinglinksProduct::getProductSn,thinglinksDevice.getDeviceSn()));
-        if(count>0){
-            return AjaxResult.warn("设备sn已经被产品使用，请更换设备sn");
-        }
-        ThinglinksProduct thinglinksProduct = thinglinksProductService.getById(thinglinksDevice.getProductId());
-        thinglinksDevice.setProductName(thinglinksProduct.getProductName());
-        thinglinksDevice.setProductSn(thinglinksProduct.getProductSn());
-        thinglinksDevice.setCreateTime(new Date());
-        thinglinksDevice.setCreateBy(SecurityUtils.getUsername());
-        thinglinksDevice.setId(null);
-        thinglinksDevice.setDeviceType(thinglinksProduct.getDeviceType());
-        thinglinksDevice.setComponentId(thinglinksProduct.getComponentId());
-        thinglinksDevice.setComponentName(thinglinksProduct.getComponentName());
-        thinglinksDevice.setProtocolId(thinglinksProduct.getProtocolId());
-        thinglinksDevice.setProtocolName(thinglinksProduct.getProtocolName());
-        thinglinksDeviceService.save(thinglinksDevice);
-        thinglinksDeviceService.syncPropertyToDevice(thinglinksDevice.getDeviceSn());
-        thinglinksWarnConfigService.syncWarnConfigToDevice(thinglinksProduct.getProductSn(),thinglinksDevice.getDeviceSn());
-        thinglinksProductService.syncDeviceCount(thinglinksProduct.getProductSn());
-        CacheUtils.updateDeviceCache(thinglinksDevice.getDeviceSn());
-        return AjaxResult.success();
+        return thinglinksDeviceService.saveDevice(thinglinksDevice);
     }
 
     /**
@@ -127,15 +119,35 @@ public class ThinglinksDeviceController extends BaseController
     }
 
     /**
+     * 修改设备modbus从站ID
+     */
+    @PutMapping("/updateSlaveId")
+    public AjaxResult updateSlaveId(@RequestBody ThinglinksDevice thinglinksDevice)
+    {
+        thinglinksDeviceService.update(new LambdaUpdateWrapper<ThinglinksDevice>()
+                .eq(ThinglinksDevice::getDeviceSn,thinglinksDevice.getDeviceSn())
+                .set(ThinglinksDevice::getSlaveId,thinglinksDevice.getSlaveId()));
+        ThinglinksDevice newDevice = thinglinksDeviceService.getOne(new LambdaQueryWrapper<ThinglinksDevice>()
+                .eq(ThinglinksDevice::getDeviceSn,thinglinksDevice.getDeviceSn()),false);
+        CacheUtils.updateDeviceCache(newDevice.getDeviceSn());
+        return AjaxResult.success();
+    }
+
+    /**
      * 删除设备
      */
-	@DeleteMapping("/{ids}")
+    @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable String[] ids)
     {
         for (String id : ids) {
             ThinglinksDevice device = thinglinksDeviceService.getById(id);
             thinglinksDeviceService.removeById(id);
             thinglinksProductService.syncDeviceCount(device.getProductSn());
+            thinglinksWarnConfigService.remove(new LambdaUpdateWrapper<ThinglinksWarnConfig>()
+                    .eq(ThinglinksWarnConfig::getBelongSn,device.getDeviceSn()));
+            thinglinksFunctionService.remove(new LambdaUpdateWrapper<ThinglinksFunction>()
+                    .eq(ThinglinksFunction::getBelongSn,device.getDeviceSn()));
+            CacheUtils.DEVICE_MAP.remove(device.getDeviceSn());
         }
         return AjaxResult.success();
     }
@@ -161,6 +173,7 @@ public class ThinglinksDeviceController extends BaseController
                 .set(ThinglinksDevice::getRegularCleaning,thinglinksDevice.getRegularCleaning())
                 .set(ThinglinksDevice::getRetentionTime,thinglinksDevice.getRetentionTime())
                 .set(ThinglinksDevice::getRetentionUnit,thinglinksDevice.getRetentionUnit()));
+        CacheUtils.updateDeviceCache(thinglinksDevice.getDeviceSn());
         return AjaxResult.success("修改成功");
     }
 

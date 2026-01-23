@@ -1,26 +1,33 @@
 package com.thinglinks.business.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import java.util.List;
+import javax.servlet.http.HttpServletResponse;
+
+import com.thinglinks.common.utils.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.thinglinks.business.domain.ThinglinksFunctionRecord;
-import com.thinglinks.business.service.IThinglinksFunctionRecordService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.thinglinks.common.utils.PageUtils;
 import com.thinglinks.common.annotation.Log;
 import com.thinglinks.common.core.controller.BaseController;
 import com.thinglinks.common.core.domain.AjaxResult;
-import com.thinglinks.common.core.page.TableDataInfo;
 import com.thinglinks.common.enums.BusinessType;
-import com.thinglinks.common.utils.PageUtils;
-import com.thinglinks.common.utils.StringUtils;
+import com.thinglinks.business.domain.ThinglinksFunctionRecord;
+import com.thinglinks.business.service.IThinglinksFunctionRecordService;
 import com.thinglinks.common.utils.poi.ExcelUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletResponse;
-import java.util.List;
+import com.thinglinks.common.core.page.TableDataInfo;
 
 /**
  * 指令下发记录Controller
- * 
+ *
  * @author ruoyi
  * @date 2025-10-29
  */
@@ -91,7 +98,7 @@ public class ThinglinksFunctionRecordController extends BaseController
      * 删除指令下发记录
      */
     @Log(title = "指令下发记录", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
+    @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable String[] ids)
     {
         return toAjax(ThinglinksFunctionRecordService.deleteThinglinksFunctionRecordByIds(ids));

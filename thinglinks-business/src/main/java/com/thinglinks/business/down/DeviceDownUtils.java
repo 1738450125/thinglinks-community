@@ -6,6 +6,7 @@ import com.thinglinks.business.domain.*;
 import com.thinglinks.business.service.IThinglinksDeviceLogsService;
 import com.thinglinks.business.service.IThinglinksFunctionRecordService;
 import com.thinglinks.business.service.IThinglinksFunctionService;
+import com.thinglinks.business.utils.CacheUtils;
 import com.thinglinks.common.core.domain.AjaxResult;
 import com.thinglinks.common.utils.StringUtils;
 import com.thinglinks.common.utils.spring.SpringUtils;
@@ -67,9 +68,7 @@ public class DeviceDownUtils {
         record.setFunctionParams(params);
         record.setIsSuccess(isOk?"1":"0");
         record.setTriggerType(triggerType);
-        ThinglinksFunction function = SpringUtils.getBean(IThinglinksFunctionService.class).getOne(new LambdaQueryWrapper<ThinglinksFunction>()
-                .eq(ThinglinksFunction::getFunctionCode,functionCode)
-                .eq(ThinglinksFunction::getBelongSn,deviceSn));
+        ThinglinksFunction function = CacheUtils.getDeviceFunctionCache(deviceSn,functionCode);
         record.setFunctionId(function.getId());
         record.setFunctionName(function.getFunctionName());
         SpringUtils.getBean(IThinglinksFunctionRecordService.class).save(record);

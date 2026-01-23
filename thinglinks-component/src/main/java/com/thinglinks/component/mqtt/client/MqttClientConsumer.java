@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import static com.thinglinks.component.mqtt.client.MqttClientManager.CLIENT_DEVICE;
+
 /**
  * @Description:
  * @Author: thinglinks

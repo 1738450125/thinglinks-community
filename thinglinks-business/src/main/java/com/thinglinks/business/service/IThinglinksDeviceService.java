@@ -3,6 +3,7 @@ package com.thinglinks.business.service;
 import java.util.List;
 import com.thinglinks.business.domain.ThinglinksDevice;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.thinglinks.common.core.domain.AjaxResult;
 
 /**
  * 设备Service接口
@@ -69,4 +70,13 @@ public interface IThinglinksDeviceService extends IService<ThinglinksDevice>
      * 同步产品物模型属性到设备
      */
     public boolean syncPropertyToDevice(String deviceSn);
+    /**
+     * 同步指令到设备
+     * @return
+     */
+    public boolean syncProductToDevice(String deviceSn);
+    /**
+     * 新增设备
+     */
+    public AjaxResult saveDevice(ThinglinksDevice device);
 }
