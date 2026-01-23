@@ -5,13 +5,13 @@
  Source Server Type    : MySQL
  Source Server Version : 80200 (8.2.0)
  Source Host           : localhost:3306
- Source Schema         : thinglinks-community
+ Source Schema         : thinglinks-iot
 
  Target Server Type    : MySQL
  Target Server Version : 80200 (8.2.0)
  File Encoding         : 65001
 
- Date: 08/01/2026 00:47:22
+ Date: 23/01/2026 21:21:36
 */
 
 SET NAMES utf8mb4;
@@ -44,7 +44,7 @@ CREATE TABLE `gen_table`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`table_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '代码生成业务表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '代码生成业务表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of gen_table
@@ -65,6 +65,7 @@ INSERT INTO `gen_table` VALUES (13, 'thinglinks_linkage_action_record', '设备�
 INSERT INTO `gen_table` VALUES (14, 'thinglinks_linkage_warn_record', '设备联动告警记录', NULL, NULL, 'ThinglinksLinkageWarnRecord', 'crud', 'element-ui', 'com.thinglinks.system', 'business', 'linkageRecord', '设备联动告警记录', 'ruoyi', '0', '/', '{}', 'admin', '2025-11-20 13:47:10', '', '2025-11-20 13:48:17', NULL);
 INSERT INTO `gen_table` VALUES (15, 'thinglinks_scheduled_task', '定时引擎配置表', NULL, NULL, 'ThinglinksScheduledTask', 'crud', 'element-ui', 'com.thinglinks.business', 'business', 'scheduledEngine', '定时引擎配置', 'ruoyi', '0', '/', '{}', 'admin', '2025-12-02 11:05:23', '', '2025-12-02 11:06:00', NULL);
 INSERT INTO `gen_table` VALUES (16, 'thinglinks_modbus_config', 'modbus协议读取配置表', NULL, NULL, 'ThinglinksModbusConfig', 'crud', 'element-ui', 'com.thinglinks.business', 'business', 'modbus', 'modbus协议读取配置', 'ruoyi', '0', '/', '{}', 'admin', '2025-12-16 13:40:59', '', '2025-12-16 13:41:21', NULL);
+INSERT INTO `gen_table` VALUES (18, 'thinglinks_device_group', '设备分组', NULL, NULL, 'ThinglinksDeviceGroup', 'crud', 'element-ui', 'com.thinglinks.business', 'business', 'deviceGroup', '设备分组', 'ruoyi', '0', '/', '{\"parentMenuId\":0}', 'admin', '2026-01-18 17:20:25', '', '2026-01-18 17:22:48', NULL);
 
 -- ----------------------------
 -- Table structure for gen_table_column
@@ -94,7 +95,7 @@ CREATE TABLE `gen_table_column`  (
   `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`column_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 172 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '代码生成业务表字段' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 179 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '代码生成业务表字段' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of gen_table_column
@@ -254,6 +255,13 @@ INSERT INTO `gen_table_column` VALUES (152, 16, 'create_time', '创建时间', '
 INSERT INTO `gen_table_column` VALUES (153, 16, 'register_range', '范围,逗号分隔如（1,2-5,7）', 'text', 'String', 'registerRange', '0', '0', '0', '1', '1', '1', '1', 'EQ', 'textarea', '', 6, 'admin', '2025-12-16 13:40:59', '', '2025-12-16 13:41:21');
 INSERT INTO `gen_table_column` VALUES (154, 16, 'interval_time', '多少毫秒读取一次', 'int', 'Long', 'intervalTime', '0', '0', '0', '1', '1', '1', '1', 'EQ', 'input', '', 7, 'admin', '2025-12-16 13:40:59', '', '2025-12-16 13:41:21');
 INSERT INTO `gen_table_column` VALUES (155, 16, 'delay_time', '同一设备读取属性延迟时间', 'int', 'Long', 'delayTime', '0', '0', '0', '1', '1', '1', '1', 'EQ', 'input', '', 8, 'admin', '2025-12-16 13:40:59', '', '2025-12-16 13:41:21');
+INSERT INTO `gen_table_column` VALUES (172, 18, 'id', 'id', 'varchar(255)', 'String', 'id', '1', '0', '0', '1', NULL, NULL, NULL, 'EQ', 'input', '', 1, 'admin', '2026-01-18 17:20:25', '', '2026-01-18 17:22:48');
+INSERT INTO `gen_table_column` VALUES (173, 18, 'group_name', '分组名称', 'varchar(255)', 'String', 'groupName', '0', '0', '0', '1', '1', '1', '1', 'LIKE', 'input', '', 2, 'admin', '2026-01-18 17:20:25', '', '2026-01-18 17:22:48');
+INSERT INTO `gen_table_column` VALUES (174, 18, 'group_code', '唯一标识', 'varchar(255)', 'String', 'groupCode', '0', '0', '0', '1', '1', '1', '1', 'EQ', 'input', '', 3, 'admin', '2026-01-18 17:20:25', '', '2026-01-18 17:22:48');
+INSERT INTO `gen_table_column` VALUES (175, 18, 'type', '0-产品 1-设备', 'varchar(255)', 'String', 'type', '0', '0', '0', '1', '1', '1', '1', 'EQ', 'select', '', 4, 'admin', '2026-01-18 17:20:25', '', '2026-01-18 17:22:48');
+INSERT INTO `gen_table_column` VALUES (176, 18, 'sort_num', '排序', 'int', 'Long', 'sortNum', '0', '0', '0', '1', '1', '1', '1', 'EQ', 'input', '', 5, 'admin', '2026-01-18 17:20:25', '', '2026-01-18 17:22:48');
+INSERT INTO `gen_table_column` VALUES (177, 18, 'remark', '备注', 'text', 'String', 'remark', '0', '0', '0', '1', '1', '1', NULL, 'EQ', 'textarea', '', 6, 'admin', '2026-01-18 17:20:25', '', '2026-01-18 17:22:48');
+INSERT INTO `gen_table_column` VALUES (178, 18, 'create_time', '创建时间', 'datetime', 'Date', 'createTime', '0', '0', '0', '1', NULL, NULL, NULL, 'EQ', 'datetime', '', 7, 'admin', '2026-01-18 17:20:25', '', '2026-01-18 17:22:48');
 
 -- ----------------------------
 -- Table structure for qrtz_blob_triggers
@@ -488,7 +496,7 @@ CREATE TABLE `sys_config`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`config_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '参数配置表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 105 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '参数配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_config
@@ -615,7 +623,7 @@ CREATE TABLE `sys_dict_type`  (
 -- Records of sys_dict_type
 -- ----------------------------
 INSERT INTO `sys_dict_type` VALUES (1, '用户性别', 'sys_user_sex', '0', 'admin', '2025-09-15 11:09:58', '', NULL, '用户性别列表');
-INSERT INTO `sys_dict_type` VALUES (2, '菜单状态', 'sys_show_hide', '0', 'admin', '2025-09-15 11:09:58', 'admin', '2026-01-02 23:06:05', '菜单状态列表');
+INSERT INTO `sys_dict_type` VALUES (2, '菜单状态', 'sys_show_hide', '0', 'admin', '2025-09-15 11:09:58', '', NULL, '菜单状态列表');
 INSERT INTO `sys_dict_type` VALUES (3, '系统开关', 'sys_normal_disable', '0', 'admin', '2025-09-15 11:09:58', '', NULL, '系统开关列表');
 INSERT INTO `sys_dict_type` VALUES (4, '任务状态', 'sys_job_status', '0', 'admin', '2025-09-15 11:09:58', '', NULL, '任务状态列表');
 INSERT INTO `sys_dict_type` VALUES (5, '任务分组', 'sys_job_group', '0', 'admin', '2025-09-15 11:09:58', '', NULL, '任务分组列表');
@@ -690,7 +698,7 @@ CREATE TABLE `sys_logininfor`  (
   PRIMARY KEY (`info_id`) USING BTREE,
   INDEX `idx_sys_logininfor_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_logininfor_lt`(`login_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 612 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 572 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_logininfor
@@ -722,7 +730,7 @@ CREATE TABLE `sys_menu`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '备注',
   PRIMARY KEY (`menu_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2047 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '菜单权限表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 2048 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '菜单权限表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_menu
@@ -888,7 +896,7 @@ CREATE TABLE `sys_oper_log`  (
   INDEX `idx_sys_oper_log_bt`(`business_type` ASC) USING BTREE,
   INDEX `idx_sys_oper_log_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_oper_log_ot`(`oper_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 424 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 503 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_oper_log
@@ -1094,7 +1102,7 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', '/profile/avatar/2025/12/16/807ef4a3ad9e4176a84f9be14ce8bdcf.jpg', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2026-01-08 00:13:21', '2025-12-05 16:23:20', 'admin', '2025-09-15 11:09:57', '', '2025-12-16 10:07:26', '管理员');
+INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', '/profile/avatar/2026/01/18/5142f3b5120d456e9ed3f2a7aeb2d23d.jpg', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2026-01-22 20:52:14', '2025-12-05 16:23:20', 'admin', '2025-09-15 11:09:57', '', '2026-01-18 19:01:39', '管理员');
 INSERT INTO `sys_user` VALUES (2, 105, 'ry', '若依', '00', 'ry@qq.com', '15666666666', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-09-15 11:09:57', '2025-09-15 11:09:57', 'admin', '2025-09-15 11:09:57', '', NULL, '测试员');
 
 -- ----------------------------
@@ -1155,7 +1163,6 @@ CREATE TABLE `thinglinks_component`  (
 -- ----------------------------
 -- Records of thinglinks_component
 -- ----------------------------
-INSERT INTO `thinglinks_component` VALUES ('2008942264572387329', 'mqtt', 'MQTT_CLIENT', 'tcp://127.0.0.1:1883', NULL, '0', NULL, NULL, NULL, NULL, NULL, '1', '{\"brokerUrl\":\"tcp://127.0.0.1:1883\",\"username\":\"test\",\"password\":\"123456\",\"topicStr\":\"#\",\"cleanSession\":true,\"keepAliveInterval\":60}', '2008942344268357634', 'mqtt');
 
 -- ----------------------------
 -- Table structure for thinglinks_device
@@ -1190,6 +1197,8 @@ CREATE TABLE `thinglinks_device`  (
   `position_name` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '定位地点名称',
   `slave_id` int NULL DEFAULT NULL COMMENT 'modbus从站id',
   `modbus_read` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '0' COMMENT '是否开启modbus数据读取 0-关闭 1-开启',
+  `group_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '分组CODE',
+  `group_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '分组名称',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `device_sn`(`device_sn` ASC) USING BTREE COMMENT '设备sn'
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '设备表' ROW_FORMAT = DYNAMIC;
@@ -1197,7 +1206,6 @@ CREATE TABLE `thinglinks_device`  (
 -- ----------------------------
 -- Records of thinglinks_device
 -- ----------------------------
-INSERT INTO `thinglinks_device` VALUES ('2008942788646477826', 'mqtt_001', '设备一号', '2008942695260299265', 'mqtt产品', 'product_mqtt', '2026-01-08 00:44:20', 'admin', NULL, NULL, NULL, NULL, '2008942344268357634', 'mqtt', '1', NULL, 60, '1', '0', 1, NULL, '2008942264572387329', 'mqtt', NULL, NULL, NULL, NULL, '0');
 
 -- ----------------------------
 -- Table structure for thinglinks_device_logs
@@ -1217,15 +1225,6 @@ CREATE TABLE `thinglinks_device_logs`  (
 -- ----------------------------
 -- Records of thinglinks_device_logs
 -- ----------------------------
-INSERT INTO `thinglinks_device_logs` VALUES (2008943135213428737, 'mqtt_001', '2026-01-08 00:45:42', '{\"coapIsRecover\":false,\"deviceSn\":\"mqtt_001\",\"httNeedReply\":false,\"isOnline\":true,\"isRegister\":false,\"isStore\":true,\"properties\":{\"voice\":65.2,\"inTemperature\":22.5,\"outTemperature\":31,\"humidity\":45.7,\"windSpeed\":12.8,\"deviceSn\":\"mqtt_001\"},\"reportTime\":\"2026-01-08 00:45:42.436\"}', '2026-01-08 00:45:42', 'PROPERTY');
-INSERT INTO `thinglinks_device_logs` VALUES (2008943135297314817, 'mqtt_001', '2026-01-08 00:45:42', NULL, '2026-01-08 00:45:42', 'ONLINE');
-INSERT INTO `thinglinks_device_logs` VALUES (2008943139042828289, 'mqtt_001', '2026-01-08 00:45:43', '{\"coapIsRecover\":false,\"deviceSn\":\"mqtt_001\",\"httNeedReply\":false,\"isOnline\":true,\"isRegister\":false,\"isStore\":true,\"properties\":{\"voice\":65.2,\"inTemperature\":22.5,\"outTemperature\":31,\"humidity\":45.7,\"windSpeed\":12.8,\"deviceSn\":\"mqtt_001\"},\"reportTime\":\"2026-01-08 00:45:43.361\"}', '2026-01-08 00:45:43', 'PROPERTY');
-INSERT INTO `thinglinks_device_logs` VALUES (2008943141488107522, 'mqtt_001', '2026-01-08 00:45:44', '{\"coapIsRecover\":false,\"deviceSn\":\"mqtt_001\",\"httNeedReply\":false,\"isOnline\":true,\"isRegister\":false,\"isStore\":true,\"properties\":{\"voice\":65.2,\"inTemperature\":22.5,\"outTemperature\":31,\"humidity\":45.7,\"windSpeed\":12.8,\"deviceSn\":\"mqtt_001\"},\"reportTime\":\"2026-01-08 00:45:43.944\"}', '2026-01-08 00:45:44', 'PROPERTY');
-INSERT INTO `thinglinks_device_logs` VALUES (2008943143522344961, 'mqtt_001', '2026-01-08 00:45:44', '{\"coapIsRecover\":false,\"deviceSn\":\"mqtt_001\",\"httNeedReply\":false,\"isOnline\":true,\"isRegister\":false,\"isStore\":true,\"properties\":{\"voice\":65.2,\"inTemperature\":22.5,\"outTemperature\":31,\"humidity\":45.7,\"windSpeed\":12.8,\"deviceSn\":\"mqtt_001\"},\"reportTime\":\"2026-01-08 00:45:44.431\"}', '2026-01-08 00:45:44', 'PROPERTY');
-INSERT INTO `thinglinks_device_logs` VALUES (2008943153039220739, 'mqtt_001', '2026-01-08 00:45:47', '{\"coapIsRecover\":false,\"deviceSn\":\"mqtt_001\",\"httNeedReply\":false,\"isOnline\":true,\"isRegister\":false,\"isStore\":true,\"properties\":{\"voice\":65.2,\"inTemperature\":22.5,\"outTemperature\":31,\"humidity\":45.7,\"windSpeed\":12.8,\"deviceSn\":\"mqtt_001\"},\"reportTime\":\"2026-01-08 00:45:46.697\"}', '2026-01-08 00:45:47', 'PROPERTY');
-INSERT INTO `thinglinks_device_logs` VALUES (2008943155824238594, 'mqtt_001', '2026-01-08 00:45:47', '{\"coapIsRecover\":false,\"deviceSn\":\"mqtt_001\",\"httNeedReply\":false,\"isOnline\":true,\"isRegister\":false,\"isStore\":true,\"properties\":{\"voice\":65.2,\"inTemperature\":22.5,\"outTemperature\":31,\"humidity\":45.7,\"windSpeed\":12.8,\"deviceSn\":\"mqtt_001\"},\"reportTime\":\"2026-01-08 00:45:47.361\"}', '2026-01-08 00:45:47', 'PROPERTY');
-INSERT INTO `thinglinks_device_logs` VALUES (2008943171372523522, 'mqtt_001', '2026-01-08 00:45:51', '{\"coapIsRecover\":false,\"deviceSn\":\"mqtt_001\",\"httNeedReply\":false,\"isOnline\":true,\"isRegister\":false,\"isStore\":true,\"properties\":{\"voice\":65.2,\"inTemperature\":22.5,\"outTemperature\":31,\"humidity\":45.7,\"windSpeed\":12.8,\"deviceSn\":\"mqtt_001\"},\"reportTime\":\"2026-01-08 00:45:51.07\"}', '2026-01-08 00:45:51', 'PROPERTY');
-INSERT INTO `thinglinks_device_logs` VALUES (2008943173771665409, 'mqtt_001', '2026-01-08 00:45:52', '{\"coapIsRecover\":false,\"deviceSn\":\"mqtt_001\",\"httNeedReply\":false,\"isOnline\":true,\"isRegister\":false,\"isStore\":true,\"properties\":{\"voice\":65.2,\"inTemperature\":22.5,\"outTemperature\":31,\"humidity\":45.7,\"windSpeed\":12.8,\"deviceSn\":\"mqtt_001\"},\"reportTime\":\"2026-01-08 00:45:51.644\"}', '2026-01-08 00:45:52', 'PROPERTY');
 
 -- ----------------------------
 -- Table structure for thinglinks_function
@@ -1297,6 +1296,8 @@ CREATE TABLE `thinglinks_product`  (
   `component_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '组件id',
   `component_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '组件名称',
   `custom_config` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '自定义配置',
+  `group_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '分组CODE',
+  `group_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '分组名称',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `product_sn`(`product_sn` ASC) USING BTREE COMMENT '产品sn'
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '产品表' ROW_FORMAT = DYNAMIC;
@@ -1304,7 +1305,6 @@ CREATE TABLE `thinglinks_product`  (
 -- ----------------------------
 -- Records of thinglinks_product
 -- ----------------------------
-INSERT INTO `thinglinks_product` VALUES ('2008942695260299265', 'product_mqtt', 'mqtt产品', NULL, NULL, '2008942344268357634', 'mqtt', 1, '1', NULL, '2026-01-08 00:43:58', NULL, NULL, NULL, '0', 60, '0', 1, NULL, '2008942264572387329', 'mqtt', NULL);
 
 -- ----------------------------
 -- Table structure for thinglinks_properties
@@ -1330,12 +1330,6 @@ CREATE TABLE `thinglinks_properties`  (
 -- ----------------------------
 -- Records of thinglinks_properties
 -- ----------------------------
-INSERT INTO `thinglinks_properties` VALUES ('2008942976425467906', 'product_mqtt', '0', 'windSpeed', '风速', '0', 'float', 0, '0', NULL, 'm/s');
-INSERT INTO `thinglinks_properties` VALUES ('2008942976442245122', 'product_mqtt', '0', 'inTemperature', '室内温度', '0', 'float', 0, '0', NULL, '摄氏度');
-INSERT INTO `thinglinks_properties` VALUES ('2008942976442245123', 'product_mqtt', '0', 'outTemperature', '室外温度', '0', 'float', 0, '0', NULL, '摄氏度');
-INSERT INTO `thinglinks_properties` VALUES ('2008942978933661697', 'mqtt_001', '1', 'windSpeed', '风速', '0', 'float', 0, '0', NULL, 'm/s');
-INSERT INTO `thinglinks_properties` VALUES ('2008942978942050305', 'mqtt_001', '1', 'inTemperature', '室内温度', '0', 'float', 0, '0', NULL, '摄氏度');
-INSERT INTO `thinglinks_properties` VALUES ('2008942978950438913', 'mqtt_001', '1', 'outTemperature', '室外温度', '0', 'float', 0, '0', NULL, '摄氏度');
 
 -- ----------------------------
 -- Table structure for thinglinks_protocol
@@ -1364,7 +1358,6 @@ CREATE TABLE `thinglinks_protocol`  (
 -- ----------------------------
 -- Records of thinglinks_protocol
 -- ----------------------------
-INSERT INTO `thinglinks_protocol` VALUES ('2008942344268357634', 'mqtt', 'E:\\thinglinks-community\\protocol\\529e6030-52c4-4a15-b16a-ca6b3d072a8e.jar', 'com.thinglinks.protocol.parent.MqttClientProtocol', 'quickly_create.jar', 'jar', '529e6030-52c4-4a15-b16a-ca6b3d072a8e.jar', NULL, NULL, NULL, NULL, NULL, NULL, '1', NULL, 'MQTT_CLIENT');
 
 -- ----------------------------
 -- Table structure for thinglinks_warn_config
@@ -1384,14 +1377,13 @@ CREATE TABLE `thinglinks_warn_config`  (
   `update_by` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '修改人',
   `execute_action` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '执行动作json',
   `is_enable` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '0' COMMENT '是否启用 0-否 1-是',
+  `warn_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '0' COMMENT '类型 0-属性 1-上线 2-下线',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '告警配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of thinglinks_warn_config
 -- ----------------------------
-INSERT INTO `thinglinks_warn_config` VALUES ('2008943084827254785', '温度告警', 'product_mqtt', '0', '{\"actions\":[],\"belongSn\":\"product_mqtt\",\"belongType\":\"0\",\"conditions\":[{\"attribute\":\"inTemperature\",\"operator\":\"gt\",\"value\":\"10\"}],\"delayTime\":0,\"enable\":true,\"id\":\"2008943084827254785\",\"level\":\"1\",\"message\":\"温度告警\",\"name\":\"温度告警\",\"relation\":\"and\"}', '温度告警', '1', '2026-01-08 00:45:30', 'admin', NULL, NULL, '[]', '1');
-INSERT INTO `thinglinks_warn_config` VALUES ('2008943096088961026', '温度告警', 'mqtt_001', '1', '{\"actions\":[],\"belongSn\":\"mqtt_001\",\"belongType\":\"1\",\"conditions\":[{\"attribute\":\"inTemperature\",\"operator\":\"gt\",\"value\":\"10\"}],\"delayTime\":0,\"enable\":true,\"id\":\"2008943096088961026\",\"level\":\"1\",\"message\":\"温度告警\",\"name\":\"温度告警\",\"relation\":\"and\"}', '温度告警', '1', '2026-01-08 00:45:33', 'admin', NULL, NULL, '[]', '1');
 
 -- ----------------------------
 -- Table structure for thinglinks_warn_record
@@ -1407,6 +1399,7 @@ CREATE TABLE `thinglinks_warn_record`  (
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `warn_level` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '1' COMMENT '告警等级 1-紧急 2-严重 3-一般 4-警告 5-正常',
   `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '0' COMMENT '0-未处理 1-已处理',
+  `warn_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '0' COMMENT '类型 0-属性 1-上线 2-下线',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `belong_sn`(`belong_sn` ASC) USING BTREE,
   INDEX `create_time`(`create_time` DESC) USING BTREE,
@@ -1417,13 +1410,5 @@ CREATE TABLE `thinglinks_warn_record`  (
 -- ----------------------------
 -- Records of thinglinks_warn_record
 -- ----------------------------
-INSERT INTO `thinglinks_warn_record` VALUES ('2008943135221817345', '2008943096088961026', '温度告警', '温度告警', '{\"windSpeed\":12.8,\"inTemperature\":22.5,\"outTemperature\":31}', 'mqtt_001', '2026-01-08 00:45:42', '1', '0');
-INSERT INTO `thinglinks_warn_record` VALUES ('2008943139042828290', '2008943096088961026', '温度告警', '温度告警', '{\"windSpeed\":12.8,\"inTemperature\":22.5,\"outTemperature\":31}', 'mqtt_001', '2026-01-08 00:45:43', '1', '0');
-INSERT INTO `thinglinks_warn_record` VALUES ('2008943141488107523', '2008943096088961026', '温度告警', '温度告警', '{\"windSpeed\":12.8,\"inTemperature\":22.5,\"outTemperature\":31}', 'mqtt_001', '2026-01-08 00:45:44', '1', '0');
-INSERT INTO `thinglinks_warn_record` VALUES ('2008943143522344962', '2008943096088961026', '温度告警', '温度告警', '{\"windSpeed\":12.8,\"inTemperature\":22.5,\"outTemperature\":31}', 'mqtt_001', '2026-01-08 00:45:44', '1', '0');
-INSERT INTO `thinglinks_warn_record` VALUES ('2008943153039220738', '2008943096088961026', '温度告警', '温度告警', '{\"windSpeed\":12.8,\"inTemperature\":22.5,\"outTemperature\":31}', 'mqtt_001', '2026-01-08 00:45:47', '1', '0');
-INSERT INTO `thinglinks_warn_record` VALUES ('2008943155832627202', '2008943096088961026', '温度告警', '温度告警', '{\"windSpeed\":12.8,\"inTemperature\":22.5,\"outTemperature\":31}', 'mqtt_001', '2026-01-08 00:45:47', '1', '0');
-INSERT INTO `thinglinks_warn_record` VALUES ('2008943171372523523', '2008943096088961026', '温度告警', '温度告警', '{\"windSpeed\":12.8,\"inTemperature\":22.5,\"outTemperature\":31}', 'mqtt_001', '2026-01-08 00:45:51', '1', '0');
-INSERT INTO `thinglinks_warn_record` VALUES ('2008943173771665410', '2008943096088961026', '温度告警', '温度告警', '{\"windSpeed\":12.8,\"inTemperature\":22.5,\"outTemperature\":31}', 'mqtt_001', '2026-01-08 00:45:52', '1', '0');
 
 SET FOREIGN_KEY_CHECKS = 1;
