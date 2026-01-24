@@ -120,8 +120,11 @@
               :current-page="deviceParams.pageNum"
               :page-size="deviceParams.pageSize"
               :total="deviceParams.total"
+              :page-sizes="[10, 20, 50, 100, 1000]"
+              :limit.sync="deviceParams.pageSize"
               layout="total, sizes, prev, pager, next, jumper"
               @current-change="getDeviceListByProductSn"
+              @size-change="handleSizeChange"
             />
           </div>
         </el-tab-pane>
@@ -336,16 +339,21 @@
               <el-form-item label="告警条件">
                 <div v-for="(condition, index) in currentRule.conditions" :key="index" class="rule-condition">
                   <div class="condition-row">
-                    <el-select v-model="condition.attribute" placeholder="选择属性" style="width: 180px;">
+                    <el-select v-model="condition.type" placeholder="选择类型" style="width: 100px;">
+                      <el-option label="上线" value="device_online"></el-option>
+                      <el-option label="离线" value="device_offline"></el-option>
+                      <el-option label="属性" value="device_property"></el-option>
+                    </el-select>
+                    <el-select v-model="condition.attribute" placeholder="选择属性" style="width: 180px;" v-if="condition.type=='device_property'">
                       <el-option v-for="attr in attributeOptions" :key="attr.identifier" :label="attr.name"
                                  :value="attr.identifier"></el-option>
                     </el-select>
-                    <el-select v-model="condition.operator" placeholder="选择规则" style="width: 120px; margin-left: 10px;">
+                    <el-select v-model="condition.operator" placeholder="选择规则" style="width: 120px; margin-left: 10px;" v-if="condition.type=='device_property'">
                       <el-option v-for="op in operatorOptions" :key="op.value" :label="op.label"
                                  :value="op.value"></el-option>
                     </el-select>
                     <el-input v-model="condition.value" placeholder="输入值"
-                              style="width: 180px; margin-left: 10px;"></el-input>
+                              style="width: 120px; margin-left: 10px;" v-if="condition.type=='device_property'"></el-input>
                     <el-button v-if="currentRule.conditions.length > 1" type="danger" icon="el-icon-delete" circle
                                style="margin-left: 10px;" @click="removeCondition(index)"></el-button>
                   </div>
@@ -596,7 +604,6 @@ import {
 } from "@/api/business/function";
 import {listDevice, delDevice, updateDevice, addDevice, getDevice} from "@/api/business/device";
 import {getComponent} from "@/api/business/component";
-
 export default {
   name: 'ProductDetail',
   created() {
@@ -646,7 +653,7 @@ export default {
       currentRule: {
         id: null,
         name: '',
-        conditions: [{attribute: '', operator: '', value: ''}],
+        conditions: [{attribute: '', operator: '', value: '',type:''}],
         relation: 'and',
         level: '1',
         message: '',
@@ -738,7 +745,8 @@ export default {
       // 避免点击输入框时和图标事件冲突（可选）
       this.mapDialogVisible = true;
     },
-    getDeviceListByProductSn() {
+    getDeviceListByProductSn(page) {
+      this.deviceParams.pageNum = page
       this.deviceParams.productSn = this.product.productSn
       listDevice(this.deviceParams).then(res => {
         if(res?.code==200){
@@ -746,6 +754,11 @@ export default {
           this.deviceParams.total = res?.total
         }
       })
+    },
+    handleSizeChange(val) {
+      this.deviceParams.pageSize = val;
+      this.deviceParams.pageNum = 1; // 重置为第一页
+      this.getDeviceListByProductSn();
     },
     /** 提交按钮 */
     submitDeviceForm() {
@@ -788,7 +801,8 @@ export default {
         linkMethodName: null,
         protocolId: null,
         protocolName: null,
-        status: null
+        status: null,
+        timeoutSeconds:null
       }
       this.selectedDeviceType = null
       this.resetForm("deviceForm")
@@ -941,7 +955,13 @@ export default {
     },
     formatCondition(rule) {
       const conditionStrings = rule.conditions.map(cond => {
-        const attr = this.attributeOptions.find(a => a.identifier === cond.attribute)?.name || cond.attribute;
+        let attr = this.attributeOptions.find(a => a.identifier === cond.attribute)?.name || cond.attribute;
+        if(cond.type=='device_online'){
+          attr = '上线';
+        }
+        if(cond.type=='device_offline'){
+          attr = '离线';
+        }
         const op = this.operatorOptions.find(o => o.value === cond.operator)?.label || cond.operator;
         return `${attr} ${op} ${cond.value}`;
       });
@@ -1105,6 +1125,7 @@ export default {
       this.openAddDevice = true;
       getDevice(item.id).then(response => {
         this.deviceForm = response.data
+        this.selectedDeviceType = this.deviceForm.deviceType;
       })
     },
     saveAlarmRule() {
@@ -1114,7 +1135,7 @@ export default {
         return;
       }
 
-      if (!this.currentRule.conditions.every(c => c.attribute && c.operator && c.value)) {
+      if (!this.currentRule.conditions.filter(c => c.type === 'device_property').every(c => c.attribute && c.operator && c.value)) {
         this.$message.error('请完善所有告警条件');
         return;
       }

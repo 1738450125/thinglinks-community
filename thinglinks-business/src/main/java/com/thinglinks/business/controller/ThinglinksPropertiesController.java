@@ -1,5 +1,10 @@
 package com.thinglinks.business.controller;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import javax.servlet.http.HttpServletResponse;
+
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -7,34 +12,34 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.thinglinks.business.domain.ThinglinksDevice;
 import com.thinglinks.business.domain.ThinglinksDeviceLogs;
-import com.thinglinks.business.domain.ThinglinksProperties;
+import com.thinglinks.business.domain.ThinglinksProduct;
 import com.thinglinks.business.domain.dto.PropertyListDTO;
 import com.thinglinks.business.service.IThinglinksDeviceLogsService;
 import com.thinglinks.business.service.IThinglinksDeviceService;
 import com.thinglinks.business.service.IThinglinksProductService;
-import com.thinglinks.business.service.IThinglinksPropertiesService;
 import com.thinglinks.business.utils.PropertyConverter;
-import com.thinglinks.common.core.controller.BaseController;
-import com.thinglinks.common.core.domain.AjaxResult;
-import com.thinglinks.common.core.page.TableDataInfo;
 import com.thinglinks.common.utils.PageUtils;
 import com.thinglinks.common.utils.StringUtils;
-import com.thinglinks.common.utils.poi.ExcelUtil;
 import com.thinglinks.component.message.DecodeMessage;
 import com.thinglinks.component.message.MessageCache;
 import com.thinglinks.component.message.PropertyNode;
 import com.thinglinks.component.utils.PropertyToJson;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletResponse;
-import java.util.Arrays;
-import java.util.List;
+import com.thinglinks.common.annotation.Log;
+import com.thinglinks.common.core.controller.BaseController;
+import com.thinglinks.common.core.domain.AjaxResult;
+import com.thinglinks.common.enums.BusinessType;
+import com.thinglinks.business.domain.ThinglinksProperties;
+import com.thinglinks.business.service.IThinglinksPropertiesService;
+import com.thinglinks.common.utils.poi.ExcelUtil;
+import com.thinglinks.common.core.page.TableDataInfo;
 
 /**
  * 物模型属性定义Controller
- * 
+ *
  * @author thinglinks
  * @date 2025-09-18
  */
@@ -50,6 +55,7 @@ public class ThinglinksPropertiesController extends BaseController
     private IThinglinksDeviceLogsService thinglinksDeviceLogsService;
     @Autowired
     private IThinglinksDeviceService thinglinksDeviceService;
+
     public static final List<String> KEYWORD = Arrays.asList("currentStatus","changeStatus","deviceProperty","device_online","device_offline");
     /**
      * 查询物模型属性定义列表
@@ -106,7 +112,7 @@ public class ThinglinksPropertiesController extends BaseController
     /**
      * 删除物模型属性定义
      */
-	@DeleteMapping("/{ids}")
+    @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable String[] ids)
     {
         return toAjax(thinglinksPropertiesService.deleteThinglinksPropertiesByIds(ids));
@@ -120,13 +126,13 @@ public class ThinglinksPropertiesController extends BaseController
     public AjaxResult saveBatch(@RequestBody PropertyListDTO propertyListDTO){
         List<ThinglinksProperties> list = propertyListDTO.getPropertyList();
         if(list!=null&&list.size()>0){
-            thinglinksPropertiesService.remove(new LambdaUpdateWrapper<ThinglinksProperties>()
-                    .eq(ThinglinksProperties::getBelongSn,propertyListDTO.getBelongSn()));
             for (int i = 0; i < list.size(); i++) {
                 if(KEYWORD.contains(list.get(i).getIdentifier())){
                     return AjaxResult.error("不能使用关键字作为属性值");
                 }
             }
+            thinglinksPropertiesService.remove(new LambdaUpdateWrapper<ThinglinksProperties>()
+                    .eq(ThinglinksProperties::getBelongSn,propertyListDTO.getBelongSn()));
             list.forEach(property->{
                 property.setBelongSn(propertyListDTO.getBelongSn());
                 property.setBelongType(propertyListDTO.getBelongType());
@@ -134,7 +140,9 @@ public class ThinglinksPropertiesController extends BaseController
                 property.setParentId("0");
                 property.setSortNum(0L);
             });
-            thinglinksPropertiesService.saveBatch(list);
+            if(list.size()>0){
+                thinglinksPropertiesService.saveBatch(list);
+            }
             ThinglinksDevice device = thinglinksDeviceService.getOne(new LambdaQueryWrapper<ThinglinksDevice>()
                     .eq(ThinglinksDevice::getDeviceSn,propertyListDTO.getBelongSn()),false);
             if(device!=null){

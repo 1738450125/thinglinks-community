@@ -47,4 +47,6 @@ private static final long serialVersionUID = 1L;
     private String warnLevel;
     /**处理状态 0-未处理 1-已处理*/
     private String status;
+    /** 告警类型 0-属性告警 1-在线告警 2-离线告警 */
+    private String warnType;
 }

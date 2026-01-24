@@ -15,4 +15,6 @@ public class WarnRuleItem {
     private String operator;
     //比较值
     private String value;
+    //类型 device_online、device_offline、device_property
+    private String type;
 }

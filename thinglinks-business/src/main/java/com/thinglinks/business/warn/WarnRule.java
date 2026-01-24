@@ -37,4 +37,6 @@ public class WarnRule {
     private String belongType;
     //多少秒内不重复告警
     private Integer delayTime;
+    //告警类型
+    private String warnType;
 }

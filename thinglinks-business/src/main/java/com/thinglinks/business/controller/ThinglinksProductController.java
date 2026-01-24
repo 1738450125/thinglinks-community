@@ -1,5 +1,14 @@
 package com.thinglinks.business.controller;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import javax.servlet.http.HttpServletResponse;
+
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -8,25 +17,19 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.thinglinks.business.domain.*;
 import com.thinglinks.business.service.*;
 import com.thinglinks.business.utils.CacheUtils;
-import com.thinglinks.common.core.controller.BaseController;
-import com.thinglinks.common.core.domain.AjaxResult;
-import com.thinglinks.common.core.page.TableDataInfo;
 import com.thinglinks.common.utils.PageUtils;
 import com.thinglinks.common.utils.StringUtils;
-import com.thinglinks.common.utils.poi.ExcelUtil;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletResponse;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
+import com.thinglinks.common.annotation.Log;
+import com.thinglinks.common.core.controller.BaseController;
+import com.thinglinks.common.core.domain.AjaxResult;
+import com.thinglinks.common.enums.BusinessType;
+import com.thinglinks.common.utils.poi.ExcelUtil;
+import com.thinglinks.common.core.page.TableDataInfo;
 
 /**
  * 产品Controller
@@ -60,6 +63,8 @@ public class ThinglinksProductController extends BaseController {
     public TableDataInfo list(ThinglinksProduct thinglinksProduct) {
         QueryWrapper<ThinglinksProduct> queryWrapper = new QueryWrapper<>();
         queryWrapper.orderByAsc("create_time");
+        queryWrapper.like(StringUtils.isNotEmpty(thinglinksProduct.getProductName()),"product_name",thinglinksProduct.getProductName());
+        queryWrapper.like(StringUtils.isNotEmpty(thinglinksProduct.getProductSn()),"product_sn",thinglinksProduct.getProductSn());
         Page<ThinglinksProduct> page = new Page<ThinglinksProduct>(PageUtils.getPageNum(), PageUtils.getPageSize());
         Page<ThinglinksProduct> pageList = thinglinksProductService.page(page, queryWrapper);
         return getDataTable(pageList);
@@ -100,7 +105,9 @@ public class ThinglinksProductController extends BaseController {
             thinglinksProduct.setProtocolId(component.getProtocolId());
             thinglinksProduct.setProtocolName(component.getProtocolName());
         }
-        return toAjax(thinglinksProductService.save(thinglinksProduct));
+        thinglinksProductService.save(thinglinksProduct);
+        CacheUtils.PRODUCT_MAP.put(thinglinksProduct.getProductSn(),thinglinksProduct);
+        return AjaxResult.success();
     }
 
     /**
@@ -120,7 +127,10 @@ public class ThinglinksProductController extends BaseController {
                     .set(ThinglinksDevice::getProtocolName,component.getProtocolName()));
             CacheUtils.updateDeviceCacheByProductSn(thinglinksProduct.getProductSn());
         }
-        return toAjax(thinglinksProductService.updateById(thinglinksProduct));
+        thinglinksProductService.updateById(thinglinksProduct);
+        ThinglinksProduct product = thinglinksProductService.getById(thinglinksProduct.getId());
+        CacheUtils.PRODUCT_MAP.put(product.getProductSn(),product);
+        return AjaxResult.success();
     }
 
     /**
@@ -134,6 +144,7 @@ public class ThinglinksProductController extends BaseController {
                 return AjaxResult.warn("请先删除产品关联的设备");
             }
             thinglinksProductService.removeById(id);
+            CacheUtils.PRODUCT_MAP.remove(product.getProductSn());
         }
         return AjaxResult.success();
     }
@@ -189,6 +200,14 @@ public class ThinglinksProductController extends BaseController {
                 .set(ThinglinksDevice::getRegularCleaning,thinglinksProduct.getRegularCleaning())
                 .set(ThinglinksDevice::getRetentionTime,thinglinksProduct.getRetentionTime())
                 .set(ThinglinksDevice::getRetentionUnit,thinglinksProduct.getRetentionUnit()));
+        CacheUtils.DEVICE_MAP.keySet().forEach(key->{
+            ThinglinksDevice device = CacheUtils.DEVICE_MAP.get(key);
+            if(device!=null&&thinglinksProduct.getProductSn().equals(device.getProductSn())){
+                device.setRetentionTime(thinglinksProduct.getRetentionTime());
+                device.setRetentionUnit(thinglinksProduct.getRetentionUnit());
+                device.setRegularCleaning(thinglinksProduct.getRegularCleaning());
+            }
+        });
         return AjaxResult.success("同步成功");
     }
 
@@ -207,7 +226,15 @@ public class ThinglinksProductController extends BaseController {
         thinglinksDeviceService.update(new LambdaUpdateWrapper<ThinglinksDevice>()
                 .eq(ThinglinksDevice::getProductSn,thinglinksProduct.getProductSn())
                 .set(ThinglinksDevice::getCustomConfig,thinglinksProduct.getCustomConfig()));
-        CacheUtils.updateDeviceCustomConfigByProductSn(thinglinksProduct.getProductSn(),thinglinksProduct.getCustomConfig());
+        CacheUtils.DEVICE_MAP.keySet().forEach(key->{
+            ThinglinksDevice device = CacheUtils.DEVICE_MAP.get(key);
+            if(device!=null&&thinglinksProduct.getProductSn().equals(device.getProductSn())){
+                device.setCustomConfig(thinglinksProduct.getCustomConfig());
+            }
+        });
+        ThinglinksProduct product = thinglinksProductService.getOne(new LambdaUpdateWrapper<ThinglinksProduct>()
+                .eq(ThinglinksProduct::getProductSn,thinglinksProduct.getProductSn()));
+        CacheUtils.PRODUCT_MAP.put(thinglinksProduct.getProductSn(),product);
         return AjaxResult.success("同步成功");
     }
 

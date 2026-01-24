@@ -43,51 +43,51 @@
             :lg="4"
             class="card-col"
           >
-              <el-card class="protocol-card" shadow="hover">
-                <div slot="header" class="card-header">
-                  <h4 class="protocol-name">{{ item.protocolName || '未知协议' }}</h4>
+            <el-card class="protocol-card" shadow="hover">
+              <div slot="header" class="card-header">
+                <h4 class="protocol-name">{{ item.protocolName || '未知协议' }}</h4>
+              </div>
+              <div class="card-content">
+                <div class="card-item">
+                  <i class="el-icon-folder"></i>
+                  <span class="value">{{ item.localUrl || '未设置路径' }}</span>
                 </div>
-                <div class="card-content">
-                  <div class="card-item">
-                    <i class="el-icon-folder"></i>
-                    <span class="value">{{ item.localUrl || '未设置路径' }}</span>
-                  </div>
-                  <div class="card-item">
-                    <i class="el-icon-cpu"></i>
-                    <span class="value">{{ item.mainClassPath || '未设置入口类' }}</span>
-                  </div>
-                  <div class="card-item">
-                    <i class="el-icon-document"></i>
-                    <span class="value">{{ item.originName || '未设置原始名称' }}</span>
-                  </div>
-                  <div class="card-item">
-                    <i class="el-icon-edit-outline"></i>
-                    <span class="value">{{ item.newName || '未设置新名称' }}</span>
-                  </div>
-                  <div class="card-item">
-                    <i class="el-icon-collection-tag"></i>
-                    <span class="value">{{ item.type === 0 ? 'JAR包' : '其他类型' }}</span>
-                  </div>
+                <div class="card-item">
+                  <i class="el-icon-cpu"></i>
+                  <span class="value">{{ item.mainClassPath || '未设置入口类' }}</span>
                 </div>
-                <div class="card-actions">
-                  <el-button
-                    size="mini"
-                    class="action-btn edit-btn"
-                    icon="el-icon-edit"
-                    @click.stop="handleUpdate(item)"
-                    v-hasPermi="['business:protocol:edit']"
-                  >修改
-                  </el-button>
-                  <el-button
-                    size="mini"
-                    class="action-btn delete-btn"
-                    icon="el-icon-delete"
-                    @click.stop="handleDelete(item)"
-                    v-hasPermi="['business:protocol:remove']"
-                  >删除
-                  </el-button>
+                <div class="card-item">
+                  <i class="el-icon-document"></i>
+                  <span class="value">{{ item.originName || '未设置原始名称' }}</span>
                 </div>
-              </el-card>
+                <div class="card-item">
+                  <i class="el-icon-edit-outline"></i>
+                  <span class="value">{{ item.newName || '未设置新名称' }}</span>
+                </div>
+                <div class="card-item">
+                  <i class="el-icon-collection-tag"></i>
+                  <span class="value">{{ item.type === 0 ? 'JAR包' : '其他类型' }}</span>
+                </div>
+              </div>
+              <div class="card-actions">
+                <el-button
+                  size="mini"
+                  class="action-btn edit-btn"
+                  icon="el-icon-edit"
+                  @click.stop="handleUpdate(item)"
+                  v-hasPermi="['business:protocol:edit']"
+                >修改
+                </el-button>
+                <el-button
+                  size="mini"
+                  class="action-btn delete-btn"
+                  icon="el-icon-delete"
+                  @click.stop="handleDelete(item)"
+                  v-hasPermi="['business:protocol:remove']"
+                >删除
+                </el-button>
+              </div>
+            </el-card>
           </el-col>
         </el-row>
       </el-checkbox-group>
@@ -125,8 +125,14 @@
           </el-form-item>
           <el-form-item label="网络类型" prop="protocolType" required>
             <el-select v-model="form.protocolType" placeholder="网络类型">
+              <el-option label="MQTT_BROKER" value="MQTT_BROKER"></el-option>
               <el-option label="MQTT_CLIENT" value="MQTT_CLIENT"></el-option>
               <el-option label="TCP_SERVER" value="TCP_SERVER"></el-option>
+              <el-option label="UDP_SERVER" value="UDP_SERVER"></el-option>
+              <el-option label="COAP_SERVER" value="COAP_SERVER"></el-option>
+              <el-option label="HTTP_SERVER" value="HTTP_SERVER"></el-option>
+              <el-option label="WEBSOCKET_SERVER" value="WEBSOCKET_SERVER"></el-option>
+              <el-option label="MODBUS_TCP" value="MODBUS_TCP"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="上传JAR包" prop="file">

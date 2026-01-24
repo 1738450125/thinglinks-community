@@ -1,27 +1,34 @@
 package com.thinglinks.business.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import java.util.List;
+import javax.servlet.http.HttpServletResponse;
+
+import com.thinglinks.common.utils.StringUtils;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.thinglinks.business.domain.ThinglinksDeviceLogs;
-import com.thinglinks.business.service.IThinglinksDeviceLogsService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.thinglinks.common.utils.PageUtils;
 import com.thinglinks.common.annotation.Log;
 import com.thinglinks.common.core.controller.BaseController;
 import com.thinglinks.common.core.domain.AjaxResult;
-import com.thinglinks.common.core.page.TableDataInfo;
 import com.thinglinks.common.enums.BusinessType;
-import com.thinglinks.common.utils.PageUtils;
-import com.thinglinks.common.utils.StringUtils;
+import com.thinglinks.business.domain.ThinglinksDeviceLogs;
+import com.thinglinks.business.service.IThinglinksDeviceLogsService;
 import com.thinglinks.common.utils.poi.ExcelUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletResponse;
-import java.util.List;
+import com.thinglinks.common.core.page.TableDataInfo;
 
 /**
  * 设备日志Controller
- * 
+ *
  * @author thinglinks
  * @date 2025-09-22
  */
@@ -98,7 +105,7 @@ public class ThinglinksDeviceLogsController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('business:logs:remove')")
     @Log(title = "设备日志", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
+    @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)
     {
         return toAjax(thinglinksDeviceLogsService.deleteThinglinksDeviceLogsByIds(ids));

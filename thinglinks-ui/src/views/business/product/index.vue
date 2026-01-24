@@ -164,9 +164,9 @@
           <el-form-item label="产品SN" prop="productSn" required>
             <el-input v-model="form.productSn" placeholder="请输入产品SN" :disabled="form.id"/>
           </el-form-item>
-<!--          <el-form-item label="接入方式id" prop="linkMethodId">-->
-<!--            <el-input v-model="form.linkMethodId" placeholder="请输入接入方式id"/>-->
-<!--          </el-form-item>-->
+          <!--          <el-form-item label="接入方式id" prop="linkMethodId">-->
+          <!--            <el-input v-model="form.linkMethodId" placeholder="请输入接入方式id"/>-->
+          <!--          </el-form-item>-->
           <el-form-item label="设备类型" prop="deviceType" required>
             <el-select v-model="form.deviceType" placeholder="设备类型" :disabled="form.id" @change="handleProductChange">
               <el-option label="直连设备" value="0"></el-option>
@@ -187,12 +187,6 @@
           <el-form-item label="心跳时间(S)" prop="timeoutSeconds" required v-if="selectedDeviceType=='2'">
             <el-input type="number" v-model="form.timeoutSeconds" placeholder="心跳时间(S)" />
           </el-form-item>
-<!--          <el-form-item label="协议id" prop="protocolId">-->
-<!--            <el-input v-model="form.protocolId" placeholder="请输入协议id"/>-->
-<!--          </el-form-item>-->
-<!--          <el-form-item label="协议名称" prop="protocolName">-->
-<!--            <el-input v-model="form.protocolName" placeholder="请输入协议名称"/>-->
-<!--          </el-form-item>-->
           <el-form-item label="备注" prop="remark">
             <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"/>
           </el-form-item>
@@ -239,7 +233,6 @@
 <script>
 import {listProduct, getProduct, delProduct, addProduct, updateProduct} from "@/api/business/product"
 import {listComponent} from "@/api/business/component"
-
 export default {
   name: "Product",
   data() {
@@ -305,21 +298,7 @@ export default {
     },
     reset() {
       this.form = {
-        id: null,
-        productSn: null,
-        productName: null,
-        linkMethodId: null,
-        linkMethodName: null,
-        protocolId: null,
-        protocolName: null,
-        deviceCount: null,
-        deviceType: null,
-        remark: null,
-        createTime: null,
-        updateTime: null,
-        createBy: null,
-        updateBy: null,
-        status: null
+
       }
       this.selectedDeviceType = null
       this.resetForm("form")
@@ -408,7 +387,7 @@ export default {
     },
     handleProductChange(deviceType) {
       this.selectedDeviceType = deviceType
-      if (!this.isEdit) {
+      if (!this.isEdit && deviceType === '2') {
         this.form.timeoutSeconds = 60
       }
     }

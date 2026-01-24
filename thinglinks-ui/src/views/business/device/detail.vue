@@ -310,29 +310,32 @@
                   </el-tag>
                 </template>
               </el-table-column>
-<!--              <el-table-column label="操作" width="200" fixed="right">-->
-<!--                <template slot-scope="scope">-->
-<!--                  <el-button size="mini" icon="el-icon-view" @click="viewAlarmDetail(scope.row)" class="table-action">详情</el-button>-->
-<!--                  <el-button-->
-<!--                    v-if="scope.row.status !== 'resolved'"-->
-<!--                    size="mini"-->
-<!--                    icon="el-icon-check"-->
-<!--                    type="success"-->
-<!--                    @click="resolveAlarm(scope.row)"-->
-<!--                    class="table-action"-->
-<!--                  >-->
-<!--                    标记处理-->
-<!--                  </el-button>-->
-<!--                </template>-->
-<!--              </el-table-column>-->
+              <!--              <el-table-column label="操作" width="200" fixed="right">-->
+              <!--                <template slot-scope="scope">-->
+              <!--                  <el-button size="mini" icon="el-icon-view" @click="viewAlarmDetail(scope.row)" class="table-action">详情</el-button>-->
+              <!--                  <el-button-->
+              <!--                    v-if="scope.row.status !== 'resolved'"-->
+              <!--                    size="mini"-->
+              <!--                    icon="el-icon-check"-->
+              <!--                    type="success"-->
+              <!--                    @click="resolveAlarm(scope.row)"-->
+              <!--                    class="table-action"-->
+              <!--                  >-->
+              <!--                    标记处理-->
+              <!--                  </el-button>-->
+              <!--                </template>-->
+              <!--              </el-table-column>-->
             </el-table>
             <el-pagination
               class="pagination"
               :current-page="functionRecordParams.pageNum"
               :page-size="functionRecordParams.pageSize"
+              :page-sizes="[10, 20, 50, 100, 1000]"
+              :limit.sync="functionRecordParams.pageSize"
               :total="functionRecordParams.total"
               layout="total, sizes, prev, pager, next, jumper"
               @current-change="handleFunctionRecordPageChange"
+              @size-change="handleFunctionSizeChange"
             />
           </div>
         </el-tab-pane>
@@ -386,13 +389,18 @@
               <el-form-item label="告警条件">
                 <div v-for="(condition, index) in currentRule.conditions" :key="index" class="rule-condition">
                   <div class="condition-row">
-                    <el-select v-model="condition.attribute" placeholder="选择属性" style="width: 180px;">
+                    <el-select v-model="condition.type" placeholder="选择类型" style="width: 100px;">
+                      <el-option label="上线" value="device_online"></el-option>
+                      <el-option label="离线" value="device_offline"></el-option>
+                      <el-option label="属性" value="device_property"></el-option>
+                    </el-select>
+                    <el-select v-model="condition.attribute" placeholder="选择属性" style="width: 180px;" v-if="condition.type=='device_property'">
                       <el-option v-for="attr in attributeOptions" :key="attr.identifier" :label="attr.name" :value="attr.identifier"></el-option>
                     </el-select>
-                    <el-select v-model="condition.operator" placeholder="选择规则" style="width: 120px; margin-left: 10px;">
+                    <el-select v-model="condition.operator" placeholder="选择规则" style="width: 120px; margin-left: 10px;" v-if="condition.type=='device_property'">
                       <el-option v-for="op in operatorOptions" :key="op.value" :label="op.label" :value="op.value"></el-option>
                     </el-select>
-                    <el-input v-model="condition.value" placeholder="输入值" style="width: 180px; margin-left: 10px;"></el-input>
+                    <el-input v-model="condition.value" placeholder="输入值" style="width: 120px; margin-left: 10px;" v-if="condition.type=='device_property'"></el-input>
                     <el-button v-if="currentRule.conditions.length > 1" type="danger" icon="el-icon-delete" circle style="margin-left: 10px;" @click="removeCondition(index)"></el-button>
                   </div>
 
@@ -444,10 +452,21 @@
             <div class="filter-bar">
               <el-form :inline="true" class="filter-form">
                 <el-form-item label="告警名称">
-                  <el-input v-model="warnRecordParams.configName"></el-input>
+                  <el-input v-model="warnRecordParams.configName" style="width: 150px;"></el-input>
+                </el-form-item>
+                <el-form-item label="告警类型">
+                  <el-select v-model="warnRecordParams.warnType" placeholder="全部" class="filter-select" style="width: 120px;">
+                    <el-option label="全部" value="" />
+                    <el-option label="属性告警" value="0">
+                    </el-option>
+                    <el-option label="上线提醒" value="1">
+                    </el-option>
+                    <el-option label="离线告警" value="2">
+                    </el-option>
+                  </el-select>
                 </el-form-item>
                 <el-form-item label="告警级别">
-                  <el-select v-model="warnRecordParams.warnLevel" placeholder="全部" class="filter-select">
+                  <el-select v-model="warnRecordParams.warnLevel" placeholder="全部" class="filter-select" style="width: 120px;">
                     <el-option label="全部" value="" />
                     <el-option label="紧急" value="1">
                     </el-option>
@@ -460,7 +479,7 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item label="处理状态">
-                  <el-select v-model="warnRecordParams.status" placeholder="全部" class="filter-select">
+                  <el-select v-model="warnRecordParams.status" placeholder="全部" class="filter-select" style="width: 100px;">
                     <el-option label="全部" value="" />
                     <el-option label="未处理" value="0">
                     </el-option>
@@ -489,8 +508,15 @@
               <el-table-column prop="warnLevel" label="级别" width="150">
                 <template slot-scope="scope">
 
-                  <el-tag :type="getLevelType(scope.row.warnLevel)" effect="dark" class="level-tag">
+                  <el-tag :type="getLevelType(scope.row.warnLevel)" class="level-tag">
                     {{ getLevelText(scope.row.warnLevel) }}
+                  </el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column prop="warnType" label="类型" width="150">
+                <template slot-scope="scope">
+                  <el-tag :type="getWarnTypeColor(scope.row.warnType)" class="level-tag">
+                    {{ getTypeText(scope.row.warnType) }}
                   </el-tag>
                 </template>
               </el-table-column>
@@ -523,8 +549,11 @@
               :current-page="pagination.current"
               :page-size="pagination.size"
               :total="pagination.total"
+              :page-sizes="[10, 20, 50, 100, 1000]"
+              :limit.sync="pagination.pageSize"
               layout="total, sizes, prev, pager, next, jumper"
               @current-change="handlePageChange"
+              @size-change="handleWarnSizeChange"
             />
           </div>
         </el-tab-pane>
@@ -775,7 +804,11 @@ export default {
   name: 'DeviceDetail',
   created() {
     this.deviceId = this.$route.query.id
-    this.getDeviceById(this.deviceId);
+    this.getDeviceById(this.deviceId,this.$route.query.toPage);
+    if(this.$route.query.toPage){
+      this.activeTab = this.$route.query.toPage
+      this.handleTabClick({name:this.$route.query.toPage})
+    }
   },
   computed: {
     isJsonFormat() {
@@ -838,7 +871,7 @@ export default {
       currentRule: {
         id: null,
         name: '',
-        conditions: [{ attribute: '', operator: '', value: '' }],
+        conditions: [{attribute: '', operator: '', value: '',type:''}],
         relation: 'and',
         level: '1',
         message: '',
@@ -898,7 +931,8 @@ export default {
         status:null,
         configName:null,
         belongSn:null,
-        rangeDate:null
+        rangeDate:null,
+        warnType:null
       },
       jsonStr:null,
       jsonViewerVisible: false,
@@ -980,12 +1014,28 @@ export default {
       };
       return typeMap[level] || 'info';
     },
+    getWarnTypeColor(level) {
+      const typeMap = {
+        '0': 'normal',
+        '1': 'success',
+        '2': 'danger'
+      };
+      return typeMap[level] || 'info';
+    },
     getLevelText(level) {
       const textMap = {
         '1': '紧急',
         '2': '严重',
         '3': '警告',
         '4': '正常'
+      };
+      return textMap[level] || '未知';
+    },
+    getTypeText(level) {
+      const textMap = {
+        '0': '属性告警',
+        '1': '上线提醒',
+        '2': '离线告警'
       };
       return textMap[level] || '未知';
     },
@@ -1026,6 +1076,7 @@ export default {
       if(tab.name==='alarmConfig'){
         //初始化数据
         this.getWarnConfigList();
+        this.getPropertyByDeviceSn();
       }
       //告警记录页面
       if(tab.name==='alarmRecord'){
@@ -1357,9 +1408,19 @@ export default {
       this.pagination.current = page
       this.getWarnRecordList()
     },
+    handleWarnSizeChange(val) {
+      this.pagination.size = val;
+      this.pagination.current = 1; // 重置为第一页
+      this.getWarnRecordList();
+    },
     handleFunctionRecordPageChange(page) {
       this.functionRecordParams.pageNum = page
       this.getFunctionRecordList()
+    },
+    handleFunctionSizeChange(val) {
+      this.functionRecordParams.pageSize = val;
+      this.functionRecordParams.pageNum = 1; // 重置为第一页
+      this.getFunctionRecordList();
     },
     getDeviceLastData(){
       getDeviceLastData(this.device.deviceSn).then(res=>{
@@ -1370,7 +1431,13 @@ export default {
     },
     formatCondition(rule) {
       const conditionStrings = rule.conditions.map(cond => {
-        const attr = this.attributeOptions.find(a => a.identifier === cond.attribute)?.name || cond.attribute;
+        let attr = this.attributeOptions.find(a => a.identifier === cond.attribute)?.name || cond.attribute;
+        if(cond.type=='device_online'){
+          attr = '上线';
+        }
+        if(cond.type=='device_offline'){
+          attr = '离线';
+        }
         const op = this.operatorOptions.find(o => o.value === cond.operator)?.label || cond.operator;
         return `${attr} ${op} ${cond.value}`;
       });
@@ -1409,7 +1476,7 @@ export default {
         return;
       }
 
-      if (!this.currentRule.conditions.every(c => c.attribute && c.operator && c.value)) {
+      if (!this.currentRule.conditions.filter(c => c.type === 'device_property').every(c => c.attribute && c.operator && c.value)) {
         this.$message.error('请完善所有告警条件');
         return;
       }
@@ -1919,11 +1986,12 @@ export default {
 }
 
 .custom-json-viewer {
-  height: 60vh;
   overflow: auto;
   border: 1px solid #e6e6e6;
   border-radius: 4px;
   padding: 10px;
+  overflow-y: scroll; /* 始终显示垂直滚动条 */
+  overflow-x: auto; /* 水平方向根据需要显示滚动条 */
 }
 .form-label {
   width: 100px;

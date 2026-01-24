@@ -1,5 +1,6 @@
 package com.thinglinks.component.message;
 
+import com.thinglinks.component.message.FunctionDown;
 import lombok.Data;
 
 import java.util.Date;
@@ -20,11 +21,17 @@ public class DecodeMessage {
     /**上报时间-协议中不设置则默认当前时间*/
     private Date reportTime;
 
-    //========设备自注册，需要注册时，开关和数据都需要设置
+    //========（企业版生效）设备自注册，需要注册时，开关和数据都需要设置
     /**是否需要注册设备，默认不注册，需要注册设置为true，请尽量避免注册过的设备反复注册，浪费服务器性能*/
     private Boolean isRegister = false;
-    /**设备自注册列表*/
-    private List<DeviceRegister> deviceRegister;
+    /**设备自注册产品SN*/
+    private String productSn;
+    /**设备自注册名称*/
+    private String deviceName;
+
+    //========（企业版生效）设备指令下发列表
+    /**上报消息解析后，可添加需要执行的指令*/
+    private List<FunctionDown> functionList;
 
     //========下列配置常规情况下不用修改，可根据设备情况进行修改
     /**是否存储，默认存储，用于协议判断该消息是否有用，无用消息可以选择不存储，例如心跳消息等*/

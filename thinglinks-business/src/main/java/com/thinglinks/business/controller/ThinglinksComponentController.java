@@ -1,27 +1,34 @@
 package com.thinglinks.business.controller;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import javax.servlet.http.HttpServletResponse;
+
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.thinglinks.business.domain.ThinglinksComponent;
+import com.thinglinks.business.domain.ThinglinksProduct;
 import com.thinglinks.business.domain.ThinglinksProtocol;
-import com.thinglinks.business.service.IThinglinksComponentService;
+import com.thinglinks.business.service.IThinglinksProductService;
 import com.thinglinks.business.service.IThinglinksProtocolService;
-import com.thinglinks.common.core.controller.BaseController;
-import com.thinglinks.common.core.domain.AjaxResult;
-import com.thinglinks.common.core.page.TableDataInfo;
+import com.thinglinks.business.utils.CacheUtils;
+import com.thinglinks.common.annotation.Anonymous;
+import com.thinglinks.common.exception.CommonWarnException;
 import com.thinglinks.common.utils.PageUtils;
 import com.thinglinks.common.utils.StringUtils;
-import com.thinglinks.common.utils.poi.ExcelUtil;
 import com.thinglinks.component.utils.PortChecker;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletResponse;
-import java.util.Arrays;
-import java.util.List;
+import com.thinglinks.common.core.controller.BaseController;
+import com.thinglinks.common.core.domain.AjaxResult;
+import com.thinglinks.business.domain.ThinglinksComponent;
+import com.thinglinks.business.service.IThinglinksComponentService;
+import com.thinglinks.common.utils.poi.ExcelUtil;
+import com.thinglinks.common.core.page.TableDataInfo;
 
 /**
  * 网络组件Controller
@@ -37,7 +44,8 @@ public class ThinglinksComponentController extends BaseController
     private IThinglinksComponentService thinglinksComponentService;
     @Autowired
     private IThinglinksProtocolService thinglinksProtocolService;
-
+    @Autowired
+    private IThinglinksProductService thinglinksProductService;
     /**
      * 查询网络组件列表
      */
@@ -78,6 +86,7 @@ public class ThinglinksComponentController extends BaseController
     @Transactional(rollbackFor = Exception.class)
     public AjaxResult add(@RequestBody ThinglinksComponent thinglinksComponent) throws Exception {
         thinglinksComponentService.save(thinglinksComponent);
+        CacheUtils.setComponentCache(thinglinksComponent.getId(),thinglinksComponent);
         if("1".equals(thinglinksComponent.getStatus())) {
             boolean isOk = thinglinksComponentService.openComponent(thinglinksComponent.getId());
             if (!isOk) {
@@ -106,6 +115,8 @@ public class ThinglinksComponentController extends BaseController
             if(StringUtils.isNotEmpty(thinglinksComponent.getProtocolId())){
                 bindProtocol(thinglinksComponent.getId(),thinglinksComponent.getProtocolId());
             }
+        }else {
+            thinglinksComponentService.closeComponent(thinglinksComponent.getId());
         }
         return AjaxResult.success();
     }
@@ -113,7 +124,7 @@ public class ThinglinksComponentController extends BaseController
     /**
      * 删除网络组件
      */
-	@DeleteMapping("/{ids}")
+    @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable String[] ids)
     {
         //先检查是否已经关闭
@@ -124,7 +135,15 @@ public class ThinglinksComponentController extends BaseController
         if(openCount>0){
             return AjaxResult.error("请先停用网络组件再删除");
         }
+        for (int i = 0; i < idList.size(); i++) {
+            long count = thinglinksProductService.count(new LambdaQueryWrapper<ThinglinksProduct>()
+                    .eq(ThinglinksProduct::getComponentId,idList.get(i)));
+            if(count>0){
+                return AjaxResult.error("网络组件已经被使用");
+            }
+        }
         thinglinksComponentService.removeBatchByIds(idList);
+        idList.forEach(CacheUtils::removeComponentCache);
         return AjaxResult.success("删除成功");
     }
 
@@ -158,6 +177,8 @@ public class ThinglinksComponentController extends BaseController
             thinglinksComponentService.update(new LambdaUpdateWrapper<ThinglinksComponent>()
                     .eq(ThinglinksComponent::getId,componentId)
                     .set(ThinglinksComponent::getProtocolId,protocolId));
+            component.setProtocolId(protocolId);
+            CacheUtils.setComponentCache(component.getId(),component);
             thinglinksProtocolService.update(new LambdaUpdateWrapper<ThinglinksProtocol>()
                     .eq(ThinglinksProtocol::getId,protocolId)
                     .set(ThinglinksProtocol::getComponentId,componentId)

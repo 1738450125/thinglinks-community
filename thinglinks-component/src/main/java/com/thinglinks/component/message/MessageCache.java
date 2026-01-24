@@ -36,7 +36,6 @@ public class MessageCache {
             });
             oldData.setDeviceSn(decodeMessage.getDeviceSn());
             oldData.setReportTime(decodeMessage.getReportTime()==null?new Date():decodeMessage.getReportTime());
-            oldData.setDeviceRegister(decodeMessage.getDeviceRegister());
             oldData.setCoapIsRecover(decodeMessage.getCoapIsRecover());
             oldData.setIsStore(decodeMessage.getIsStore());
             oldData.setIsOnline(decodeMessage.getIsOnline());
