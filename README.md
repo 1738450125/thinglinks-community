@@ -27,55 +27,6 @@
 ## 最新协议包代码地址
 ### [协议包代码地址](https://gitee.com/chinachentao/protocol-code)
 
-## 测试方式
-
-### 以MQTT_BROKER组件为例：
-
-#### 1、线上已经开启一个端口，连接即可
-
-![架构图](doc/img/mqtt.png)
-
-#### 2、发送以下消息到任意topic
-
-{
-"humidity": 45.7,
-"inTemperature": 22.5,
-"outTemperature": 31,
-"voice": 65.2,
-"windSpeed": 13.8,
-"deviceSn":"mqtt_001"
-}
-![架构图](doc/img/mqtt_1.png)
-
-#### 3、查看对应SN设备数据,消息已经上来
-
-![架构图](doc/img/mqtt_2.png)
-
-### Websocket方式也是如此：
-
-#### 1、线上已经开启一个ws连接地址： ws://47.109.145.72:10883/test1
-
-#### 2、发送消息
-
-{
-"humidity": 45.7,
-"inTemperature": 22.5,
-"outTemperature": 31,
-"voice": 65.2,
-"windSpeed": 12.8,
-"deviceSn":"WS_DEVICE_001"
-}
-
-#### 3、查看WS_DEVICE_001设备数据
-
-![架构图](doc/img/ws.png)
-
-#### 4、在历史数据按钮里面能够看到上下线和上报的历史数据
-
-![架构图](doc/img/history.png)
-
-### 其他网络组件也是如此，由于线上环境这两种协议比较方便测试，只添加了这两种数据。
-
 ## 🚀 核心特性
 
 ### 1. 设备全生命周期管理
@@ -148,6 +99,55 @@ DecodeMessage解析后的消息实体：
 
 EncodeMessage解析后的指令下发实体：
 ![架构图](doc/img/img_3.png)
+
+## 测试方式
+
+### 以MQTT_BROKER组件为例：
+
+#### 1、线上已经开启一个端口，连接即可
+
+![架构图](doc/img/mqtt.png)
+
+#### 2、发送以下消息到任意topic
+
+{
+"humidity": 45.7,
+"inTemperature": 22.5,
+"outTemperature": 31,
+"voice": 65.2,
+"windSpeed": 13.8,
+"deviceSn":"mqtt_001"
+}
+![架构图](doc/img/mqtt_1.png)
+
+#### 3、查看对应SN设备数据,消息已经上来
+
+![架构图](doc/img/mqtt_2.png)
+
+### Websocket方式也是如此：
+
+#### 1、线上已经开启一个ws连接地址： ws://47.109.145.72:10883/test1
+
+#### 2、发送消息
+
+{
+"humidity": 45.7,
+"inTemperature": 22.5,
+"outTemperature": 31,
+"voice": 65.2,
+"windSpeed": 12.8,
+"deviceSn":"WS_DEVICE_001"
+}
+
+#### 3、查看WS_DEVICE_001设备数据
+
+![架构图](doc/img/ws.png)
+
+#### 4、在历史数据按钮里面能够看到上下线和上报的历史数据
+
+![架构图](doc/img/history.png)
+
+### 其他网络组件也是如此，由于线上环境这两种协议比较方便测试，只添加了这两种数据。
 
 ## 🏗️ 系统架构
 
