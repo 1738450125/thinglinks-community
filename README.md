@@ -99,7 +99,7 @@ encode对应设备指令下发解析
 下面是协议中重要的类截图
 
 MqttClientProtocol接口：
-![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/img.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/img.png?raw=true)
 
 MqttClientDeal实现类：
 ![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/img_4.png)
