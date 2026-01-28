@@ -99,16 +99,16 @@ encode对应设备指令下发解析
 下面是协议中重要的类截图
 
 MqttClientProtocol接口：
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/img.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/img.png)
 
 MqttClientDeal实现类：
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/img_4.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/img_4.png)
 
 DecodeMessage解析后的消息实体：
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/img_2.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/img_2.png)
 
 EncodeMessage解析后的指令下发实体：
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/img_3.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/img_3.png)
 
 ## 测试方式
 
@@ -116,7 +116,7 @@ EncodeMessage解析后的指令下发实体：
 
 #### 1、线上已经开启一个端口，连接即可
 
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/mqtt.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/mqtt.png)
 
 #### 2、发送以下消息到任意topic
 
@@ -128,11 +128,11 @@ EncodeMessage解析后的指令下发实体：
 "windSpeed": 13.8,
 "deviceSn":"mqtt_001"
 }
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/mqtt_1.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/mqtt_1.png)
 
 #### 3、查看对应SN设备数据,消息已经上来
 
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/mqtt_2.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/mqtt_2.png)
 
 ### Websocket方式也是如此：
 
@@ -151,79 +151,79 @@ EncodeMessage解析后的指令下发实体：
 
 #### 3、查看WS_DEVICE_001设备数据
 
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/ws.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/ws.png)
 
 #### 4、在历史数据按钮里面能够看到上下线和上报的历史数据
 
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/history.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/history.png)
 
 ### 其他网络组件也是如此，由于线上环境这两种协议比较方便测试，只添加了这两种数据。
 
 ## 🏗️ 系统架构
 
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/jiagou.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/jiagou.png)
 
 ## 🛠️ 快速开始
 
 #### 1、首页
 
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/index.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/index.png)
 
 #### 2、产品管理
 
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/product.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/product.png)
 
 #### 3、告警配置
 
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/warnConfig.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/warnConfig.png)
 
 #### 4、实时数据
 
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/realtime.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/realtime.png)
 
 #### 5、指令下发
 
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/down.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/down.png)
 
 #### 6、物模型
 
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/model.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/model.png)
 
 #### 7、告警记录
 
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/warnRecord.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/warnRecord.png)
 
 #### 8、其他配置
 
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/otherConfig.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/otherConfig.png)
 
 #### 9、网络组件
 
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/component.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/component.png)
 
 #### 10、组件调试
 
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/tiaoshi.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/tiaoshi.png)
 
 #### 11、协议管理
 
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/protocol.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/protocol.png)
 
 #### 12、规则引擎-数据转发
 
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/ruleEngine.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/ruleEngine.png)
 
 #### 13、规则引擎-设备联动
 
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/liandong.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/liandong.png)
 
 #### 14、规则引擎-定时下发指令
 
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/dingshi.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/dingshi.png)
 
 #### 15、设备管理-地图服务
 
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/ditu.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/ditu.png)
 
 ### 环境要求
 
@@ -285,7 +285,7 @@ EncodeMessage解析后的指令下发实体：
 
 ### 技术交流QQ群
 #### 群号：734515931
-![架构图](https://github.com/1738450125/thinglinks-community/tree/master/doc/img/qqq.png)
+![架构图](https://github.com/1738450125/thinglinks-community/blob/master/doc/img/qqq.png)
 
 ### 商务合作请联系：邮箱 1738450125@qq.com 或者 加入QQ群联系群主
 
